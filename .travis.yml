@@ -4,4 +4,10 @@ jdk:
   - oraclejdk8
   
 script: export PATH=$JAVA_HOME/bin:$PATH
+
+deploy:
+  provider: heroku
+  api_key: $herokuKey
+  app: rsoi1
+  on: master
       
