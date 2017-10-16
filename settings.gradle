@@ -1,2 +1,6 @@
 rootProject.name = 'RsoiLab1'
-
+include 'common'
+include 'movie-service'
+include 'payment-service'
+include 'reservation-service'
+include 'client-service'

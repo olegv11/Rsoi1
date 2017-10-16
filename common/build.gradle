@@ -1,0 +1,53 @@
+group 'RSOI'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+    }
+}
+
+apply plugin: 'idea'
+apply plugin: "io.spring.dependency-management"
+apply plugin: 'findbugs'
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.boot:spring-boot-starter-parent:1.2.4.RELEASE'
+    }
+}
+
+findbugs {
+    ignoreFailures = true
+}
+
+jar {
+    baseName = 'common'
+    version =  '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    compile 'org.springframework:spring-beans'
+    compile 'org.springframework:spring-web'
+    compile 'org.hibernate:hibernate-validator'
+    compile "org.apache.commons:commons-lang3:3.4"
+    compile group: 'org.postgresql', name: 'postgresql', version: '9.3-1100-jdbc4'
+    compile "org.projectlombok:lombok:1.16.18"
+    compile "com.google.code.findbugs:jsr305:3.0.2"
+    compile "com.h2database:h2"
+
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
