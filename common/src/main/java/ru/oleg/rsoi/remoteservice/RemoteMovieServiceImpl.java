@@ -1,6 +1,8 @@
 package ru.oleg.rsoi.remoteservice;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,59 +16,38 @@ import java.rmi.RemoteException;
 @Component
 public class RemoteMovieServiceImpl implements RemoteMovieService {
 
-    @Value("${urls.services.movies}")
-    String movieServiceUrl;
+    private final RemoteRsoiServiceImpl<MovieRequest, MovieResponse> remoteService;
+
+
+    @Autowired
+    public RemoteMovieServiceImpl(@Value("${urls.services.movies}") String movieServiceUrl) {
+        remoteService = new RemoteRsoiServiceImpl<>(movieServiceUrl, MovieResponse.class, MovieResponse[].class);
+    }
 
     @Override
     public MovieResponse createMovie(String name, String description) throws RemoteServiceException {
         MovieRequest mr = new MovieRequest(name, description);
-        RestTemplate rt = new RestTemplate();
-
-        ResponseEntity<MovieResponse> re = rt.postForEntity(movieServiceUrl + "/movie/", mr,
-                MovieResponse.class);
-
-        if (re.getStatusCode() != HttpStatus.CREATED) {
-            throw new RemoteServiceException("Movie was not created");
-        }
-
-        return re.getBody();
+        return remoteService.create(mr, "/movie");
     }
 
     @Override
     public MovieResponse findMovie(int id) {
-        RestTemplate rt = new RestTemplate();
-        ResponseEntity<MovieResponse> response = rt.getForEntity(movieServiceUrl + "/movie/{id}",
-                MovieResponse.class, id);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        }
-
-        return null;
-
+        return remoteService.find(id, "/movie/{id}");
     }
 
     @Override
     public void updateMovie(int id, String name, String description) {
         MovieRequest mr = new MovieRequest(name, description);
-        RestTemplate rt = new RestTemplate();
-        rt.put(movieServiceUrl + "/movie/{id}", mr, id);
+        remoteService.update(id, mr, "/movie/{id}");
     }
 
     @Override
     public boolean movieExists(int id) {
-        return findMovie(id) != null;
+        return remoteService.exists(id, "/movie/{id}");
     }
 
     @Override
     public void deleteMovie(int id) throws RemoteServiceException {
-        RestTemplate rt = new RestTemplate();
-
-        ResponseEntity<Void> re = rt.exchange(movieServiceUrl + "/movie/{id}",
-                HttpMethod.DELETE, null, Void.class, id);
-
-        if (re.getStatusCode() != HttpStatus.NO_CONTENT) {
-            throw new RemoteServiceException("Movie was not deleted");
-        }
+        remoteService.delete(id, "/movie/{id}");
     }
 }

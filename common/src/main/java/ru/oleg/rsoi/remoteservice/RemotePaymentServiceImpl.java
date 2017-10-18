@@ -1,5 +1,6 @@
 package ru.oleg.rsoi.remoteservice;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,40 +13,27 @@ import ru.oleg.rsoi.dto.BillResponse;
 @Component
 public class RemotePaymentServiceImpl implements RemotePaymentService {
 
-    @Value("${urls.services.payments}")
-    String paymentServiceUrl;
+    private final RemoteRsoiServiceImpl<BillRequest, BillResponse> remoteService;
+
+
+    @Autowired
+    public RemotePaymentServiceImpl(@Value("${urls.services.payments}") String paymentServiceUrl) {
+        remoteService = new RemoteRsoiServiceImpl<>(paymentServiceUrl, BillResponse.class, BillResponse[].class);
+    }
 
     @Override
     public BillResponse getBill(int id) {
-        RestTemplate rt = new RestTemplate();
-        ResponseEntity<BillResponse> response = rt.getForEntity(paymentServiceUrl + "/payment/{id}",
-                BillResponse.class, id);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        }
-
-        return null;
+        return remoteService.find(id, "/payment/{id}");
     }
 
     @Override
     public BillResponse createBill(int amount) throws RemoteServiceException{
-        BillRequest mr = new BillRequest(amount);
-        RestTemplate rt = new RestTemplate();
-
-        ResponseEntity<BillResponse> re = rt.postForEntity(paymentServiceUrl + "/payment/", mr,
-                BillResponse.class);
-
-        if (re.getStatusCode() != HttpStatus.CREATED) {
-            throw new RemoteServiceException("Movie was not created");
-        }
-
-        return re.getBody();
+        BillRequest br = new BillRequest(amount);
+        return remoteService.create(br, "/payment");
     }
 
     @Override
     public void deleteBill(int id) {
-        RestTemplate rt = new RestTemplate();
-        rt.delete(paymentServiceUrl + "/{id}", id);
+        remoteService.delete(id, "/payment");
     }
 }
