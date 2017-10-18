@@ -48,7 +48,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Transactional
-    public void save(ReservationRequest request) {
+    public Reservation save(ReservationRequest request) {
         Seance seance = seanceRepository.findOne(request.getSeanceId());
         if (seance == null) {
             throw new EntityNotFoundException("Seance("+request.getSeanceId()+") not found");
@@ -74,12 +74,12 @@ public class ReservationServiceImpl implements ReservationService {
                 .setSeats(seats)
                 .setBillId(bill.getBillId());
 
-        reservationRepository.save(reservation);
+        return reservationRepository.save(reservation);
     }
 
     @Override
     @Transactional
-    public void cancelReservation(Integer id) {
+    public void deleteReservation(Integer id) {
         reservationRepository.delete(id);
     }
 }

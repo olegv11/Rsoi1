@@ -2,9 +2,11 @@ package ru.oleg.rsoi.service.reservation.domain;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import ru.oleg.rsoi.dto.ReservationResponse;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Accessors(chain = true)
@@ -29,4 +31,9 @@ public class Reservation {
     @Column
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Seat> seats;
+
+    public ReservationResponse toResponse() {
+        return new ReservationResponse(id, seance.getId(), billId, userId,
+                seats.stream().map(Seat::toResponse).collect(Collectors.toList()));
+    }
 }

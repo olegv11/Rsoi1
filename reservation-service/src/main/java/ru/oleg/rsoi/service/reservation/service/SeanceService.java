@@ -9,5 +9,5 @@ public interface SeanceService {
     Seance getById(Integer id);
     List<Seance> getByMovie(Integer movie_id);
     Seance createSeance(SeanceRequest seanceRequest);
-
+    void deleteSeance(Integer id);
 }

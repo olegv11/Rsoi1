@@ -59,6 +59,11 @@ public class SeanceServiceImpl implements SeanceService {
         return seanceRepository.save(seance);
     }
 
+    @Override
+    public void deleteSeance(Integer id) {
+        seanceRepository.delete(id);
+    }
+
     private void createSeatsForSeance(Seance seance) {
         ArrayList<Seat> seats = new ArrayList<>();
 

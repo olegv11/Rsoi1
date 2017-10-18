@@ -8,6 +8,6 @@ import java.util.List;
 public interface ReservationService {
     Reservation getById(Integer id);
     List<Reservation> getByUser(Integer user_id);
-    void save(ReservationRequest request);
-    void cancelReservation(Integer id);
+    Reservation save(ReservationRequest request);
+    void deleteReservation(Integer id);
 }

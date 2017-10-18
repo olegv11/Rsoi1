@@ -12,6 +12,8 @@ task runAll {
 
 runAll.dependsOn ':movie-service:bootRun'
 runAll.dependsOn ':payment-service:bootRun'
+runAll.dependsOn ':reservation-service:bootRun'
+runAll.dependsOn ':client-service:bootRun'
 
 
 task buildAll {

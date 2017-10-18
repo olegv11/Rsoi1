@@ -3,6 +3,7 @@ package ru.oleg.rsoi.service.reservation.domain;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import ru.oleg.rsoi.dto.SeatResponse;
 import ru.oleg.rsoi.dto.SeatType;
 
 import javax.persistence.*;
@@ -28,5 +29,9 @@ public class Seat {
     private SeatType seatType;
 
     private boolean isAvailable;
+
+    public SeatResponse toResponse() {
+        return new SeatResponse(id, seance.getId(), seatType, isAvailable);
+    }
 }
 
