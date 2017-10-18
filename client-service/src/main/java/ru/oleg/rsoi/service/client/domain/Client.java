@@ -1,11 +1,14 @@
 package ru.oleg.rsoi.service.client.domain;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
+import ru.oleg.rsoi.dto.ClientResponse;
 
 import javax.persistence.*;
 
 @Data
 @Entity
+@Accessors(chain = true)
 @Table(name = "client")
 public class Client {
     @Id
@@ -14,4 +17,8 @@ public class Client {
 
     @Column
     private String name;
+
+    public ClientResponse toResponse() {
+        return new ClientResponse(id, name);
+    }
 }
