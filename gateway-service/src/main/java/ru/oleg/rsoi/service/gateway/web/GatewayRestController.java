@@ -1,5 +1,7 @@
 package ru.oleg.rsoi.service.gateway.web;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,7 @@ import ru.oleg.rsoi.dto.reservation.SeanceResponse;
 import ru.oleg.rsoi.remoteservice.RemoteMovieService;
 import ru.oleg.rsoi.remoteservice.RemotePaymentService;
 import ru.oleg.rsoi.remoteservice.RemoteReservationService;
+import ru.oleg.rsoi.service.reservation.web.ExceptionController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
@@ -29,6 +32,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/")
 public class GatewayRestController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExceptionController.class);
 
     @Autowired
     RemoteMovieService movieService;
@@ -93,7 +98,9 @@ public class GatewayRestController {
 
     @RequestMapping(value = "/seance/{seanceId}", method = RequestMethod.GET)
     public SeanceComposite getSeanceById(@PathVariable Integer seanceId) {
+        logger.debug("GATEWAY: getting seance " + seanceId);
         SeanceResponse seanceResponse = reservationService.findSeance(seanceId);
+        logger.debug("GATEWAY: got seance" + seanceResponse);
         MovieResponse movieResponse = movieService.findMovie(seanceResponse.getMovie_id());
 
         return SeanceComposite.from(seanceResponse, movieResponse);

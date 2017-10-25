@@ -20,7 +20,7 @@ public class RemoteReservationServiceImpl implements RemoteReservationService {
     private final RemoteRsoiServiceImpl<ReservationRequest, ReservationResponse> remoteReservationService;
 
     @Autowired
-    public RemoteReservationServiceImpl(@Value("{urls.services.reservations}") String reservationServiceUrl) {
+    public RemoteReservationServiceImpl(@Value("${urls.services.reservations}") String reservationServiceUrl) {
         remoteSeanceService = new RemoteRsoiServiceImpl<>(reservationServiceUrl,
                 SeanceResponse.class, SeanceResponse[].class);
 

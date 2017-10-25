@@ -5,6 +5,7 @@ import lombok.experimental.Accessors;
 import ru.oleg.rsoi.dto.movie.MovieResponse;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -28,7 +29,7 @@ public class Movie {
 
     public MovieResponse toResponse() {
         return new MovieResponse(id, name, description,
-                ratings == null ? null : ratings.stream().mapToInt(Rating::getScore).average().orElse(0));
+                ratings == null ? 0 : ratings.stream().mapToInt(Rating::getScore).average().orElse(0));
     }
 }
 

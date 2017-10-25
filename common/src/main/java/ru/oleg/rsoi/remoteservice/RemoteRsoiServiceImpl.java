@@ -59,6 +59,7 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
 
     @Override
     public List<Response> findAll(int id, String postfix) {
+        String url = getUrl(postfix);
         ResponseEntity<Response[]> response
                 = rt.getForEntity(getUrl(postfix), typeArray, id);
 

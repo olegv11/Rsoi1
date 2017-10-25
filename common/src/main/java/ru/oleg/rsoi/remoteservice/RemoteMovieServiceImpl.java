@@ -56,6 +56,6 @@ public class RemoteMovieServiceImpl implements RemoteMovieService {
     @Override
     public void rateMovie(int userId, int movieId, int score) {
         RatingRequest request = new RatingRequest(score, movieId, userId);
-        remoteRateService.create(request, "/rate");
+        remoteRateService.create(request, "/movie/rate");
     }
 }
