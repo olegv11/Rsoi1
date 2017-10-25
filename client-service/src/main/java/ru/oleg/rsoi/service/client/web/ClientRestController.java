@@ -1,5 +1,7 @@
 package ru.oleg.rsoi.service.client.web;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,16 +18,21 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/client")
 public class ClientRestController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExceptionController.class);
+
     @Autowired
     ClientService clientService;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ClientResponse getClient(@PathVariable Integer id) {
+        logger.debug("CLIENT: Getting client " + id);
         return clientService.getById(id).toResponse();
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public Page<ClientResponse> getClients(Pageable page) {
+        logger.debug("CLIENT: getting page " + page);
         Page<Client> clients = clientService.get(page);
         return clients.map(Client::toResponse);
     }
@@ -34,6 +41,7 @@ public class ClientRestController {
     @RequestMapping(method = RequestMethod.POST)
     public ClientResponse saveClient(@RequestBody ClientRequest clientRequest,
                                      HttpServletResponse response) {
+        logger.debug("CLIENT: creating client " + clientRequest);
         Client client = clientService.save(clientRequest);
         response.addHeader(HttpHeaders.LOCATION, "/client/" + client.getId());
         return client.toResponse();
@@ -42,6 +50,7 @@ public class ClientRestController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteClient(@PathVariable Integer id) {
+        logger.debug("CLIENT: deleting client " + id);
         clientService.deleteById(id);
     }
 
