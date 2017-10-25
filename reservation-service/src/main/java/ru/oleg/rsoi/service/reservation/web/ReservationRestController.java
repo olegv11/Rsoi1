@@ -1,5 +1,7 @@
 package ru.oleg.rsoi.service.reservation.web;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,22 +18,28 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/reservation")
 public class ReservationRestController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExceptionController.class);
+
     @Autowired
     ReservationService reservationService;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ReservationResponse getReservation(@PathVariable Integer id) {
+        logger.debug("RESERVATION: getting reservation"+id);
         return reservationService.getById(id).toResponse();
     }
 
     @RequestMapping(method = RequestMethod.GET, params = "user")
     public List<ReservationResponse> getReservationByUser(@RequestParam(value = "user") Integer userId) {
+        logger.debug("RESERVATION: getting reservation for user " + userId);
         return reservationService.getByUser(userId)
                 .stream().map(Reservation::toResponse).collect(Collectors.toList());
     }
 
     @RequestMapping(method = RequestMethod.GET, params = "seance")
     public List<ReservationResponse> getReservationBySeance(@RequestParam(value = "seance") Integer seanceId) {
+        logger.debug("RESERVATION: getting reservation for seance " +seanceId);
         return reservationService.getBySeance(seanceId)
                 .stream().map(Reservation::toResponse).collect(Collectors.toList());
     }
@@ -40,6 +48,7 @@ public class ReservationRestController {
     @RequestMapping(method = RequestMethod.POST)
     public ReservationResponse createReservation(@RequestBody ReservationRequest reservationRequest,
                                        HttpServletResponse response) {
+        logger.debug("RESERVATION: creating reservation " + reservationRequest);
         Reservation reservation = reservationService.makeReservation(reservationRequest);
         response.addHeader(HttpHeaders.LOCATION, "/reservation/" + reservation.getId());
         return reservation.toResponse();
@@ -48,6 +57,7 @@ public class ReservationRestController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteReservation (@PathVariable Integer id) {
+        logger.debug("RESERVATION: deleting reservation " + id);
         reservationService.deleteReservation(id);
     }
 }

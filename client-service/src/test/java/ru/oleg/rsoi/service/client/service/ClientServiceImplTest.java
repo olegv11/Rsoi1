@@ -22,7 +22,7 @@ import static org.mockito.BDDMockito.*;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class ClientServiceImplTest {
 
     @MockBean
