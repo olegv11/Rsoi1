@@ -35,7 +35,7 @@ public class Seance {
     private Date screenDate;
 
     public SeanceResponse toResponse() {
-        return new SeanceResponse(id, movieId, seats == null ? null :
+        return new SeanceResponse(id, movieId, screenDate, seats == null ? null :
                 seats.stream().map(Seat::toResponse).collect(Collectors.toList()));
     }
 }
