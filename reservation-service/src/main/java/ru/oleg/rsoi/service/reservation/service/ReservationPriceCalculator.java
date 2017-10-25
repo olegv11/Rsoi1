@@ -1,6 +1,6 @@
 package ru.oleg.rsoi.service.reservation.service;
 
-import ru.oleg.rsoi.dto.SeatType;
+import ru.oleg.rsoi.dto.reservation.SeatType;
 import ru.oleg.rsoi.service.reservation.domain.Seat;
 import ru.oleg.rsoi.service.reservation.domain.SeatPrice;
 

@@ -1,5 +1,8 @@
 package ru.oleg.rsoi.remoteservice;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 public interface RemoteRsoiService<Request, Response> {
@@ -25,6 +28,11 @@ public interface RemoteRsoiService<Request, Response> {
      * Запрос на поиск всех объектов по идентификатору
      */
     List<Response> findAll(int id, String postfix);
+
+    /**
+     * Запрос на поиск всех объектов постранично
+     */
+    Page<Response> findAllPaged(Pageable page, String postfix);
 
     /**
      *  Запрос на обновление объекта

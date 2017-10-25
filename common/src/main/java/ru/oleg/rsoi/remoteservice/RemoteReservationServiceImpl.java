@@ -3,10 +3,12 @@ package ru.oleg.rsoi.remoteservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.oleg.rsoi.dto.ReservationRequest;
-import ru.oleg.rsoi.dto.ReservationResponse;
-import ru.oleg.rsoi.dto.SeanceRequest;
-import ru.oleg.rsoi.dto.SeanceResponse;
+import ru.oleg.rsoi.dto.reservation.ReservationRequest;
+import ru.oleg.rsoi.dto.reservation.ReservationResponse;
+import ru.oleg.rsoi.dto.reservation.SeanceRequest;
+import ru.oleg.rsoi.dto.reservation.SeanceResponse;
+import org.springframework.data.domain.Page;
+
 
 import java.util.Date;
 import java.util.List;
@@ -27,12 +29,12 @@ public class RemoteReservationServiceImpl implements RemoteReservationService {
     }
 
     @Override
-    public SeanceResponse getSeance(int id) {
+    public SeanceResponse findSeance(int id) {
         return remoteSeanceService.find(id, "/seance/{id}");
     }
 
     @Override
-    public List<SeanceResponse> getSeances(int movieId) {
+    public List<SeanceResponse> findSeancesByMovie(int movieId) {
         return remoteSeanceService.findAll(movieId, "/seance?movie={id}");
     }
 
@@ -44,12 +46,17 @@ public class RemoteReservationServiceImpl implements RemoteReservationService {
 
     @Override
     public void deleteSeance(int id) {
-        remoteSeanceService.delete(id, "/seance");
+        remoteSeanceService.delete(id, "/seance/{id}");
     }
 
     @Override
-    public ReservationResponse getReservation(int id) {
+    public ReservationResponse findReservation(int id) {
         return remoteReservationService.find(id, "/reservation/{id}");
+    }
+
+    @Override
+    public List<ReservationResponse> findReservationBySeance(int seanceId) {
+        return remoteReservationService.findAll(seanceId, "/reservation?seance={id}");
     }
 
     @Override
@@ -61,5 +68,10 @@ public class RemoteReservationServiceImpl implements RemoteReservationService {
     public ReservationResponse createReservation(int seanceId, int userId, List<Integer> seatIds) {
         ReservationRequest rr = new ReservationRequest(seanceId, userId, seatIds);
         return remoteReservationService.create(rr, "/reservation");
+    }
+
+    @Override
+    public void deleteReservation(int id) {
+        remoteReservationService.delete(id, "/reservation/{id}");
     }
 }

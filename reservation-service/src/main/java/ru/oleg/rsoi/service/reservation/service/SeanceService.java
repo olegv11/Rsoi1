@@ -1,6 +1,6 @@
 package ru.oleg.rsoi.service.reservation.service;
 
-import ru.oleg.rsoi.dto.SeanceRequest;
+import ru.oleg.rsoi.dto.reservation.SeanceRequest;
 import ru.oleg.rsoi.service.reservation.domain.Seance;
 
 import java.util.List;

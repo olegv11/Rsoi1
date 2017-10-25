@@ -7,9 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.oleg.rsoi.dto.MovieRequest;
-import ru.oleg.rsoi.dto.MovieResponse;
-import ru.oleg.rsoi.dto.RatingRequest;
+import ru.oleg.rsoi.dto.movie.MovieRequest;
+import ru.oleg.rsoi.dto.movie.MovieResponse;
+import ru.oleg.rsoi.dto.movie.RatingRequest;
 import ru.oleg.rsoi.service.movie.domain.Movie;
 import ru.oleg.rsoi.service.movie.service.MovieService;
 

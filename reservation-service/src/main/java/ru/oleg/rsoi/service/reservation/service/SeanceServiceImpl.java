@@ -2,8 +2,8 @@ package ru.oleg.rsoi.service.reservation.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.oleg.rsoi.dto.SeanceRequest;
-import ru.oleg.rsoi.dto.SeatType;
+import ru.oleg.rsoi.dto.reservation.SeanceRequest;
+import ru.oleg.rsoi.dto.reservation.SeatType;
 import ru.oleg.rsoi.remoteservice.RemoteMovieService;
 import ru.oleg.rsoi.service.reservation.domain.Seance;
 import ru.oleg.rsoi.service.reservation.domain.Seat;

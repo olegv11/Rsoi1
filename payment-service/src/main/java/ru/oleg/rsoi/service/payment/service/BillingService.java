@@ -1,6 +1,6 @@
 package ru.oleg.rsoi.service.payment.service;
 
-import ru.oleg.rsoi.dto.BillRequest;
+import ru.oleg.rsoi.dto.payment.BillRequest;
 import ru.oleg.rsoi.service.payment.domain.Bill;
 
 import java.util.List;

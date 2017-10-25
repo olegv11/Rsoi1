@@ -2,7 +2,7 @@ package ru.oleg.rsoi.service.payment.domain;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
-import ru.oleg.rsoi.dto.BillResponse;
+import ru.oleg.rsoi.dto.payment.BillResponse;
 
 import javax.persistence.*;
 

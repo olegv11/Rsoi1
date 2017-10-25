@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.oleg.rsoi.dto.BillRequest;
-import ru.oleg.rsoi.dto.BillResponse;
+import ru.oleg.rsoi.dto.payment.BillRequest;
+import ru.oleg.rsoi.dto.payment.BillResponse;
 import ru.oleg.rsoi.service.payment.domain.Bill;
 import ru.oleg.rsoi.service.payment.service.BillingService;
 
@@ -24,9 +24,10 @@ public class PaymentRestController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
-    public void createBill(@RequestBody BillRequest billRequest, HttpServletResponse response) {
+    public BillResponse createBill(@RequestBody BillRequest billRequest, HttpServletResponse response) {
         Bill bill = billingService.save(billRequest);
         response.addHeader(HttpHeaders.LOCATION, "/payment/" + bill.getId());
+        return bill.toResponse();
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

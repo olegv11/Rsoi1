@@ -3,8 +3,8 @@ package ru.oleg.rsoi.service.reservation.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.oleg.rsoi.dto.BillResponse;
-import ru.oleg.rsoi.dto.ReservationRequest;
+import ru.oleg.rsoi.dto.payment.BillResponse;
+import ru.oleg.rsoi.dto.reservation.ReservationRequest;
 import ru.oleg.rsoi.remoteservice.RemotePaymentService;
 import ru.oleg.rsoi.service.reservation.domain.Reservation;
 import ru.oleg.rsoi.service.reservation.domain.Seance;
@@ -37,7 +37,17 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional(readOnly = true)
     public Reservation getById(Integer id) {
-        return reservationRepository.findOne(id);
+        Reservation reservation = reservationRepository.findOne(id);
+        if (reservation == null) {
+            throw new EntityNotFoundException("Reservation("+id+") not found");
+        }
+        return reservation;
+    }
+
+    @Override
+    public List<Reservation> getBySeance(Integer seanceId) {
+        Seance seance = seanceRepository.findOne(seanceId);
+        return reservationRepository.findAllBySeance(seance);
     }
 
     @Override
@@ -48,7 +58,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Transactional
-    public Reservation save(ReservationRequest request) {
+    public Reservation makeReservation(ReservationRequest request) {
         Seance seance = seanceRepository.findOne(request.getSeanceId());
         if (seance == null) {
             throw new EntityNotFoundException("Seance("+request.getSeanceId()+") not found");
@@ -73,6 +83,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .setSeance(seance)
                 .setSeats(seats)
                 .setBillId(bill.getBillId());
+        seats.forEach(x -> x.setAvailable(false));
 
         return reservationRepository.save(reservation);
     }

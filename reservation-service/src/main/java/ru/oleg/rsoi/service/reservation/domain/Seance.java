@@ -2,7 +2,8 @@ package ru.oleg.rsoi.service.reservation.domain;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
-import ru.oleg.rsoi.dto.SeanceResponse;
+import ru.oleg.rsoi.dto.reservation.SeanceResponse;
+import ru.oleg.rsoi.dto.reservation.SeatResponse;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -34,7 +35,7 @@ public class Seance {
     private Date screenDate;
 
     public SeanceResponse toResponse() {
-        return new SeanceResponse(id, movieId,
+        return new SeanceResponse(id, movieId, seats == null ? null :
                 seats.stream().map(Seat::toResponse).collect(Collectors.toList()));
     }
 }

@@ -3,7 +3,7 @@ package ru.oleg.rsoi.service.payment.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.oleg.rsoi.dto.BillRequest;
+import ru.oleg.rsoi.dto.payment.BillRequest;
 import ru.oleg.rsoi.service.payment.domain.Bill;
 import ru.oleg.rsoi.service.payment.domain.PaymentStatus;
 import ru.oleg.rsoi.service.payment.repository.BillRepository;
@@ -16,9 +16,6 @@ import java.util.List;
 public class BillingServiceImpl implements BillingService {
     @Autowired
     BillRepository billRepository;
-
-    @Autowired
-    EntityManager em;
 
     @Override
     @Transactional(readOnly = true)
@@ -41,12 +38,9 @@ public class BillingServiceImpl implements BillingService {
     @Override
     @Transactional
     public Bill save(BillRequest billRequest) {
-        if (billRequest.getAmount() == 120) {
-            throw new BadBillException("Bill request has failed");
-        }
         Bill bill = new Bill()
                 .setAmount(billRequest.getAmount())
-                .setPaymentStatus(PaymentStatus.InProcess);
+                .setPaymentStatus(PaymentStatus.Done);
         return billRepository.save(bill);
     }
 

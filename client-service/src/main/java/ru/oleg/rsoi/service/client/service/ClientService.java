@@ -2,7 +2,7 @@ package ru.oleg.rsoi.service.client.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import ru.oleg.rsoi.dto.ClientRequest;
+import ru.oleg.rsoi.dto.client.ClientRequest;
 import ru.oleg.rsoi.service.client.domain.Client;
 
 

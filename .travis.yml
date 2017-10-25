@@ -3,9 +3,5 @@ language: java
 jdk:
   - oraclejdk8
   
-deploy:
-  provider: heroku
-  api_key: $herokuKey
-  app: rsoi1
-  on: master
+
       

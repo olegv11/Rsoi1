@@ -2,8 +2,8 @@ package ru.oleg.rsoi.service.movie.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import ru.oleg.rsoi.dto.MovieRequest;
-import ru.oleg.rsoi.dto.RatingRequest;
+import ru.oleg.rsoi.dto.movie.MovieRequest;
+import ru.oleg.rsoi.dto.movie.RatingRequest;
 import ru.oleg.rsoi.service.movie.domain.Movie;
 
 import java.util.List;

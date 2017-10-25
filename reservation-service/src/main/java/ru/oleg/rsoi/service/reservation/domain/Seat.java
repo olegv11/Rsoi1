@@ -2,9 +2,10 @@ package ru.oleg.rsoi.service.reservation.domain;
 
 
 import lombok.Data;
+import lombok.ToString;
 import lombok.experimental.Accessors;
-import ru.oleg.rsoi.dto.SeatResponse;
-import ru.oleg.rsoi.dto.SeatType;
+import ru.oleg.rsoi.dto.reservation.SeatResponse;
+import ru.oleg.rsoi.dto.reservation.SeatType;
 
 import javax.persistence.*;
 
@@ -12,6 +13,7 @@ import javax.persistence.*;
 @Accessors(chain = true)
 @Entity
 @Table(name = "seat")
+@ToString(exclude = "seance")
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

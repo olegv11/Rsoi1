@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.oleg.rsoi.dto.ErrorResponse;
 import ru.oleg.rsoi.remoteservice.RemoteServiceException;
-import ru.oleg.rsoi.service.payment.service.BadBillException;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -29,20 +28,6 @@ public class ExceptionController {
     @ExceptionHandler(Exception.class)
     public ErrorResponse exception(Exception exception) {
         logger.error("Internal server error:" + exception.getMessage());
-        return new ErrorResponse(exception.getMessage());
-    }
-
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(BadBillException.class)
-    public ErrorResponse badBill(BadBillException exception) {
-        logger.error("Bad bill exception:" + exception.getMessage());
-        return new ErrorResponse(exception.getMessage());
-    }
-
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(RemoteServiceException.class)
-    public ErrorResponse badBill(RemoteServiceException exception) {
-        logger.error("Bad bill exception:" + exception.getMessage());
         return new ErrorResponse(exception.getMessage());
     }
 }

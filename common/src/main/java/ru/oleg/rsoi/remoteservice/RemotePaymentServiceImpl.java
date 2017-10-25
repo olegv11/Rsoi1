@@ -2,12 +2,9 @@ package ru.oleg.rsoi.remoteservice;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import ru.oleg.rsoi.dto.BillRequest;
-import ru.oleg.rsoi.dto.BillResponse;
+import ru.oleg.rsoi.dto.payment.BillRequest;
+import ru.oleg.rsoi.dto.payment.BillResponse;
 
 
 @Component
@@ -22,7 +19,7 @@ public class RemotePaymentServiceImpl implements RemotePaymentService {
     }
 
     @Override
-    public BillResponse getBill(int id) {
+    public BillResponse findBill(int id) {
         return remoteService.find(id, "/payment/{id}");
     }
 

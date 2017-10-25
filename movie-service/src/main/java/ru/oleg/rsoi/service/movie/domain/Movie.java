@@ -2,7 +2,7 @@ package ru.oleg.rsoi.service.movie.domain;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
-import ru.oleg.rsoi.dto.MovieResponse;
+import ru.oleg.rsoi.dto.movie.MovieResponse;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -27,7 +27,8 @@ public class Movie {
     private Set<Rating> ratings;
 
     public MovieResponse toResponse() {
-        return new MovieResponse(id, name, description);
+        return new MovieResponse(id, name, description,
+                ratings == null ? null : ratings.stream().mapToInt(Rating::getScore).average().orElse(0));
     }
 }
 

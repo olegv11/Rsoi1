@@ -4,12 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.oleg.rsoi.dto.SeanceRequest;
-import ru.oleg.rsoi.dto.SeanceResponse;
+import ru.oleg.rsoi.dto.reservation.SeanceRequest;
+import ru.oleg.rsoi.dto.reservation.SeanceResponse;
 import ru.oleg.rsoi.service.reservation.domain.Seance;
 import ru.oleg.rsoi.service.reservation.service.SeanceService;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.stream.Collectors;

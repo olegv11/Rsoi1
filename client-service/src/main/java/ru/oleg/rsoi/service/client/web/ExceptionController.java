@@ -30,11 +30,4 @@ public class ExceptionController {
         logger.error("Internal server error:" + exception.getMessage());
         return new ErrorResponse(exception.getMessage());
     }
-
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(RemoteServiceException.class)
-    public ErrorResponse badBill(RemoteServiceException exception) {
-        logger.error("Bad bill exception:" + exception.getMessage());
-        return new ErrorResponse(exception.getMessage());
-    }
 }

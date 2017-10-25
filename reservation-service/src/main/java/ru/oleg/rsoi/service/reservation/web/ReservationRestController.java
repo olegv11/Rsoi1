@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.oleg.rsoi.dto.ReservationRequest;
-import ru.oleg.rsoi.dto.ReservationResponse;
+import ru.oleg.rsoi.dto.reservation.ReservationRequest;
+import ru.oleg.rsoi.dto.reservation.ReservationResponse;
 import ru.oleg.rsoi.service.reservation.domain.Reservation;
 import ru.oleg.rsoi.service.reservation.service.ReservationService;
 
@@ -24,9 +24,15 @@ public class ReservationRestController {
         return reservationService.getById(id).toResponse();
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET, params = "user")
     public List<ReservationResponse> getReservationByUser(@RequestParam(value = "user") Integer userId) {
         return reservationService.getByUser(userId)
+                .stream().map(Reservation::toResponse).collect(Collectors.toList());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, params = "seance")
+    public List<ReservationResponse> getReservationBySeance(@RequestParam(value = "seance") Integer seanceId) {
+        return reservationService.getBySeance(seanceId)
                 .stream().map(Reservation::toResponse).collect(Collectors.toList());
     }
 
@@ -34,7 +40,7 @@ public class ReservationRestController {
     @RequestMapping(method = RequestMethod.POST)
     public ReservationResponse createReservation(@RequestBody ReservationRequest reservationRequest,
                                        HttpServletResponse response) {
-        Reservation reservation = reservationService.save(reservationRequest);
+        Reservation reservation = reservationService.makeReservation(reservationRequest);
         response.addHeader(HttpHeaders.LOCATION, "/reservation/" + reservation.getId());
         return reservation.toResponse();
     }
@@ -44,6 +50,4 @@ public class ReservationRestController {
     public void deleteReservation (@PathVariable Integer id) {
         reservationService.deleteReservation(id);
     }
-
-
 }

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.oleg.rsoi.dto.ClientRequest;
+import ru.oleg.rsoi.dto.client.ClientRequest;
 import ru.oleg.rsoi.service.client.domain.Client;
 import ru.oleg.rsoi.service.client.repository.ClientRepository;
 
@@ -13,6 +13,7 @@ import javax.persistence.EntityNotFoundException;
 
 @Service
 public class ClientServiceImpl implements ClientService {
+
     @Autowired
     ClientRepository clientRepository;
 
