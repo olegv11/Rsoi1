@@ -6,6 +6,7 @@ import ru.oleg.rsoi.dto.movie.MovieResponse;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -24,8 +25,8 @@ public class Movie {
     @Column
     private String description;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Rating> ratings;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<Rating> ratings = new HashSet<Rating>();
 
     public MovieResponse toResponse() {
         return new MovieResponse(id, name, description,

@@ -31,6 +31,6 @@ public class RemotePaymentServiceImpl implements RemotePaymentService {
 
     @Override
     public void deleteBill(int id) {
-        remoteService.delete(id, "/payment");
+        remoteService.delete(id, "/payment/{id}");
     }
 }

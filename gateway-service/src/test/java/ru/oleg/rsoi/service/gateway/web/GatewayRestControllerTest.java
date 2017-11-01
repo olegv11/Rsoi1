@@ -147,7 +147,7 @@ public class GatewayRestControllerTest {
                 .setDescription("Some description");
 
         // Act
-        mvc.perform(patch("/movie/106").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(put("/movie/106").contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 

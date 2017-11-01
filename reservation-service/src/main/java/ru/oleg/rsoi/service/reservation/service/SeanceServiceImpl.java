@@ -46,7 +46,7 @@ public class SeanceServiceImpl implements SeanceService {
 
     @Override
     public Seance createSeance(SeanceRequest seanceRequest) {
-        if (!remoteMovieService.movieExists(seanceRequest.getMovieId())) {
+        if (remoteMovieService.findMovie(seanceRequest.getMovieId()) == null) {
             throw new EntityNotFoundException("Movie("+seanceRequest.getMovieId()+") does not exist.");
         }
 

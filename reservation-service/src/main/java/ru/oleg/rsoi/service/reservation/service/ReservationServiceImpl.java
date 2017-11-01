@@ -84,6 +84,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .setSeats(seats)
                 .setBillId(bill.getBillId());
         seats.forEach(x -> x.setAvailable(false));
+        seats.forEach(x -> x.setReservation(reservation));
 
         return reservationRepository.save(reservation);
     }

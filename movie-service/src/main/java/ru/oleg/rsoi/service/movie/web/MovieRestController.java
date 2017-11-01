@@ -54,13 +54,13 @@ public class MovieRestController {
         movieService.deleteById(id);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PATCH)
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public MovieResponse updateMovie(@PathVariable Integer id, @RequestBody MovieRequest movieRequest) {
         logger.debug("MOVIE: updating movie " + id + " with request " + movieRequest);
         return movieService.updateById(id, movieRequest).toResponse();
     }
 
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(value = "/rate", method = RequestMethod.POST)
     public void rateMovie(@RequestBody RatingRequest ratingRequest, HttpServletResponse response) {
         logger.debug("MOVIE: rating movie " + ratingRequest);

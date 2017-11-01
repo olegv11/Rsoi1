@@ -3,11 +3,17 @@ package ru.oleg.rsoi.remoteservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import ru.oleg.rsoi.dto.movie.MovieResponse;
 import ru.oleg.rsoi.dto.movie.MovieRequest;
 import ru.oleg.rsoi.dto.movie.RatingRequest;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 @Component
 public class RemoteMovieServiceImpl implements RemoteMovieService {
@@ -34,7 +40,19 @@ public class RemoteMovieServiceImpl implements RemoteMovieService {
 
     @Override
     public Page<MovieResponse> movies(Pageable page) {
-        return remoteService.findAllPaged(page, "/movie");
+        Page<HashMap<String, Object>> response = remoteService.findAllPaged(page, "/movie");
+        List<HashMap<String, Object>> responseMap = response.getContent();
+
+        List<MovieResponse> movies = new ArrayList<>();
+        for (HashMap<String, Object> map : response) {
+            movies.add(new MovieResponse()
+                    .setMovieId((Integer)map.get("movieId"))
+                    .setDescription((String)map.get("description"))
+                    .setName((String)map.get("name")));
+        }
+
+        //return remoteService.findAllPaged(page, "/movie");
+        return new PageImpl<MovieResponse>(movies, page, response.getTotalElements());
     }
 
     @Override

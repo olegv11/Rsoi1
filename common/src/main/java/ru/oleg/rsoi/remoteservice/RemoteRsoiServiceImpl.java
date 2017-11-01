@@ -10,9 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiService<Request, Response> {
 
@@ -72,10 +70,10 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
     }
 
     @Override
-    public Page<Response> findAllPaged(Pageable page, String postfix) {
-        ResponseEntity<RestResponsePage<Response>> response
-                = rt.exchange(getUrl(postfix), HttpMethod.GET, null,
-                new ParameterizedTypeReference<RestResponsePage<Response>>() {});
+    public Page<HashMap<String, Object>> findAllPaged(Pageable page, String postfix) {
+        ResponseEntity<RestResponsePage<HashMap<String, Object>>> response
+                = rt.exchange(getUrl(postfix)+"?page="+page.getPageNumber()+"&size="+page.getPageSize(), HttpMethod.GET, null,
+                new ParameterizedTypeReference<RestResponsePage<HashMap<String, Object>>>() {});
 
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody().pageImpl();
@@ -86,7 +84,7 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
 
     @Override
     public void update(int id, Request request, String postfix) {
-        rt.exchange(getUrl(postfix), HttpMethod.PATCH, new HttpEntity<Request>(request), Void.class, id);
+        rt.exchange(getUrl(postfix), HttpMethod.PUT, new HttpEntity<Request>(request), Void.class, id);
     }
 
     @Override
@@ -98,36 +96,5 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
     public void delete(int id, String postfix) {
         rt.delete(getUrl(postfix), id);
     }
-
-    @Getter
-    @Setter
-    public class RestResponsePage<T> extends PageImpl<T> {
-        private int number;
-        private int size;
-        private int totalPages;
-        private int numberOfElements;
-        private long totalElements;
-        private boolean previousPage;
-        private boolean first;
-        private boolean nextPage;
-        private boolean last;
-        private Sort sort;
-
-        public RestResponsePage(List<T> content, Pageable pageable, long total) {
-            super(content, pageable, total);
-        }
-
-        public RestResponsePage(List<T> content) {
-            super(content);
-        }
-
-        public RestResponsePage() {
-            super(new ArrayList<T>());
-        }
-
-        public PageImpl<T> pageImpl() {
-            return new PageImpl<T>(getContent(), new PageRequest(getNumber(),
-                    getSize(), getSort()), getTotalElements());
-        }
-    }
 }
+

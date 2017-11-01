@@ -1,12 +1,16 @@
 package ru.oleg.rsoi.service.movie.domain;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 
 @Data
 @Entity
 @Table(name = "rating")
+@ToString(exclude = "movie")
+@EqualsAndHashCode(exclude = "movie")
 public class Rating {
 
     @Id
