@@ -16,6 +16,15 @@ runAll.dependsOn ':reservation-service:bootRun'
 runAll.dependsOn ':client-service:bootRun'
 
 
+task testAll {
+}
+
+testAll.dependsOn ':movie-service:test'
+testAll.dependsOn ':payment-service:test'
+testAll.dependsOn ':reservation-service:test'
+testAll.dependsOn ':client-service:test'
+
+
 task buildAll {
 }
 

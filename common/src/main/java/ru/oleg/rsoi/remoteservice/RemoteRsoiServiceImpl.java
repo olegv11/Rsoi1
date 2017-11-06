@@ -1,15 +1,20 @@
 package ru.oleg.rsoi.remoteservice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import ru.oleg.rsoi.dto.ErrorResponse;
 
+import java.io.IOException;
 import java.util.*;
 
 public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiService<Request, Response> {
@@ -17,6 +22,8 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
     private final Class<Response> type;
     private final Class<Response[]> typeArray;
     private final String serviceUrl;
+
+    private ObjectMapper mapper = new ObjectMapper();
 
     public RemoteRsoiServiceImpl(String serviceUrl, Class<Response> responseClass, Class<Response[]> responseArrayClass) {
         this.serviceUrl = serviceUrl;
@@ -45,14 +52,22 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
 
     @Override
     public Response find(int id, String postfix) {
-        ResponseEntity<Response> response =
-                rt.getForEntity(getUrl(postfix), type, id);
+        ResponseEntity<Response> response;
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
+        try {
+            response = rt.getForEntity(getUrl(postfix), type, id);
+        } catch (HttpStatusCodeException e) {
+            try
+            {
+                ErrorResponse errorResponse = mapper.readValue(e.getResponseBodyAsString(), ErrorResponse.class);
+                throw new RemoteServiceException(errorResponse.getMessage());
+            } catch (IOException io)
+            {
+                throw new RemoteServiceException("General error");
+            }
         }
 
-        return null;
+        return response.getBody();
     }
 
     @Override
