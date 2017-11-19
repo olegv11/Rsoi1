@@ -46,6 +46,8 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public void delete(Integer id) {
-        billRepository.delete(id);
+        if (billRepository.exists(id)) {
+            billRepository.delete(id);
+        }
     }
 }

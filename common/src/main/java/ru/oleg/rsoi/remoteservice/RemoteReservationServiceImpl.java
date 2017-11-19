@@ -2,6 +2,7 @@ package ru.oleg.rsoi.remoteservice;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import ru.oleg.rsoi.dto.reservation.ReservationRequest;
 import ru.oleg.rsoi.dto.reservation.ReservationResponse;
@@ -51,7 +52,16 @@ public class RemoteReservationServiceImpl implements RemoteReservationService {
 
     @Override
     public ReservationResponse findReservation(int id) {
-        return remoteReservationService.find(id, "/reservation/{id}");
+        try
+        {
+            return remoteReservationService.find(id, "/reservation/{id}");
+        }
+        catch (RemoteServiceException ex) {
+            if (ex.getStatus() == HttpStatus.NOT_FOUND) {
+                return null;
+            }
+            throw ex;
+        }
     }
 
     @Override

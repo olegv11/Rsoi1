@@ -19,7 +19,7 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "seance_id")
     private Seance seance;
 
@@ -30,7 +30,7 @@ public class Reservation {
     private Integer userId;
 
     @Column
-    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "reservation", fetch = FetchType.EAGER)
     private List<Seat> seats;
 
     public ReservationResponse toResponse() {

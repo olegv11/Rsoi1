@@ -61,7 +61,9 @@ public class SeanceServiceImpl implements SeanceService {
 
     @Override
     public void deleteSeance(Integer id) {
-        seanceRepository.delete(id);
+        if (seanceRepository.exists(id)) {
+            seanceRepository.delete(id);
+        }
     }
 
     private void createSeatsForSeance(Seance seance) {

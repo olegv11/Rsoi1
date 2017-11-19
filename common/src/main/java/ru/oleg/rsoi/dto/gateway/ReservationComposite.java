@@ -30,4 +30,14 @@ public class ReservationComposite {
                 .setSeats(reservationResponse.getSeats() == null ? null :
                         reservationResponse.getSeats().stream().map(SeatComposite::from).collect(Collectors.toList()));
     }
+
+    public static ReservationComposite from(ReservationResponse reservationResponse) {
+        return new ReservationComposite()
+                .setReservationId(reservationResponse.getId())
+                .setSeanceId(reservationResponse.getSeance_id())
+                .setSeats(reservationResponse.getSeats() == null ? null :
+                        reservationResponse.getSeats().stream().map(SeatComposite::from).collect(Collectors.toList()))
+                .setBillId(null)
+                .setAmount(null);
+    }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
@@ -12,6 +13,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SeanceRequest {
+    @NotNull
     Integer movieId;
+    @NotNull
     Date screenDate;
 }

@@ -12,6 +12,7 @@ import ru.oleg.rsoi.service.reservation.domain.Seance;
 import ru.oleg.rsoi.service.reservation.service.SeanceService;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/seance")
 public class SeanceRestController {
     private static final Logger logger = LoggerFactory.getLogger(ExceptionController.class);
-
 
     @Autowired
     SeanceService seanceService;
@@ -39,7 +39,7 @@ public class SeanceRestController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
-    public SeanceResponse createSeance(@RequestBody SeanceRequest seanceRequest,
+    public SeanceResponse createSeance(@Valid @RequestBody SeanceRequest seanceRequest,
                                        HttpServletResponse response) {
         logger.debug("SEANCE: creating seance "+seanceRequest);
         Seance seance = seanceService.createSeance(seanceRequest);

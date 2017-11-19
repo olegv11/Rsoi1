@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Accessors(chain = true)
@@ -16,6 +17,8 @@ public class RatingRequest {
     @Min(0)
     @Max(100)
     private Integer score;
+    @NotNull
     private Integer movieId;
+    @NotNull
     private Integer userId;
 }

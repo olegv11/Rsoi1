@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -12,7 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationRequest {
+    @NotNull
     Integer seanceId;
+    @NotNull
     Integer userId;
     List<Integer> seatIds;
 }

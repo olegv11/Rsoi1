@@ -83,7 +83,9 @@ public class MovieServiceImpl implements MovieService {
     @Transactional
     public void deleteById(Integer id) {
         logger.debug("Deleting movie with id " + id);
-        movieRepository.delete(id);
+        if (movieRepository.exists(id)) {
+            movieRepository.delete(id);
+        }
     }
 
     @Override

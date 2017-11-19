@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import ru.oleg.rsoi.dto.movie.MovieRequest;
 import ru.oleg.rsoi.dto.movie.MovieResponse;
@@ -16,6 +17,7 @@ import ru.oleg.rsoi.service.movie.domain.Movie;
 import ru.oleg.rsoi.service.movie.service.MovieService;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/movie")
@@ -40,7 +42,7 @@ public class MovieRestController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
-    public MovieResponse createMovie(@RequestBody MovieRequest movieRequest, HttpServletResponse response) {
+    public MovieResponse createMovie(@Valid @RequestBody MovieRequest movieRequest, HttpServletResponse response) {
         logger.debug("MOVIE: creating movie with request " + movieRequest);
         Movie movie = movieService.save(movieRequest);
         response.addHeader(HttpHeaders.LOCATION, "/movie/" + movie.getId());
@@ -55,14 +57,14 @@ public class MovieRestController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public MovieResponse updateMovie(@PathVariable Integer id, @RequestBody MovieRequest movieRequest) {
+    public MovieResponse updateMovie(@PathVariable Integer id, @Valid @RequestBody MovieRequest movieRequest) {
         logger.debug("MOVIE: updating movie " + id + " with request " + movieRequest);
         return movieService.updateById(id, movieRequest).toResponse();
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(value = "/rate", method = RequestMethod.POST)
-    public void rateMovie(@RequestBody RatingRequest ratingRequest, HttpServletResponse response) {
+    public void rateMovie(@Valid @RequestBody RatingRequest ratingRequest, HttpServletResponse response) {
         logger.debug("MOVIE: rating movie " + ratingRequest);
         movieService.rateMovie(ratingRequest);
     }

@@ -12,6 +12,7 @@ import ru.oleg.rsoi.service.payment.domain.Bill;
 import ru.oleg.rsoi.service.payment.service.BillingService;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/payment")
@@ -29,7 +30,7 @@ public class PaymentRestController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
-    public BillResponse createBill(@RequestBody BillRequest billRequest, HttpServletResponse response) {
+    public BillResponse createBill(@Valid @RequestBody BillRequest billRequest, HttpServletResponse response) {
         logger.debug("PAYMENT: creating bill" + billRequest);
         Bill bill = billingService.save(billRequest);
         response.addHeader(HttpHeaders.LOCATION, "/payment/" + bill.getId());

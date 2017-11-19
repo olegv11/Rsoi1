@@ -23,9 +23,12 @@ import ru.oleg.rsoi.dto.reservation.SeanceResponse;
 import ru.oleg.rsoi.remoteservice.RemoteMovieService;
 import ru.oleg.rsoi.remoteservice.RemotePaymentService;
 import ru.oleg.rsoi.remoteservice.RemoteReservationService;
+import ru.oleg.rsoi.remoteservice.RemoteServiceException;
+import ru.oleg.rsoi.service.gateway.Queue;
 import ru.oleg.rsoi.service.reservation.web.ExceptionController;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,9 +48,12 @@ public class GatewayRestController {
     @Autowired
     RemoteReservationService reservationService;
 
+    @Autowired
+    Queue queue;
+
     @RequestMapping(value = "/movie", method = RequestMethod.GET)
     public Page<MovieComposite> getMovies(Pageable page) {
-        logger.debug("GATEWAY: getting page of movies:" + page);
+        logger.info("GATEWAY: getting page of movies:" + page);
         Page<MovieResponse> response = movieService.movies(page);
         List<MovieComposite> composites = new ArrayList<>();
         for (MovieResponse movie : response) {
@@ -59,29 +65,29 @@ public class GatewayRestController {
 
     @RequestMapping(value = "/movie/{movieId}", method = RequestMethod.GET)
     public MovieComposite getMovieById(@PathVariable Integer movieId) {
-        logger.debug("GATEWAY: getting movie " +  movieId);
+        logger.info("GATEWAY: getting movie " +  movieId);
         return MovieComposite.from(movieService.findMovie(movieId));
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(value = "/movie", method = RequestMethod.POST)
-    public MovieComposite createMovie(@RequestBody MovieRequest request, HttpServletResponse response) {
-        logger.debug("GATEWAY: creating movie " + request);
+    public MovieComposite createMovie(@Valid @RequestBody MovieRequest request, HttpServletResponse response) {
+        logger.info("GATEWAY: creating movie " + request);
         MovieResponse movie = movieService.createMovie(request.getName(), request.getDescription());
         response.addHeader(HttpHeaders.LOCATION, "/movie/"+movie.getMovieId());
         return MovieComposite.from(movie);
     }
 
     @RequestMapping(value = "/movie/{movieId}", method = RequestMethod.PUT)
-    public void updateMovie(@PathVariable Integer movieId, @RequestBody MovieRequest request) {
-        logger.debug("GATEWAY: uodating movie " + movieId);
+    public void updateMovie(@PathVariable Integer movieId, @Valid @RequestBody MovieRequest request) {
+        logger.info("GATEWAY: uodating movie " + movieId);
         movieService.updateMovie(movieId, request.getName(), request.getDescription());
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @RequestMapping(value = "/movie/{movieId}", method = RequestMethod.DELETE)
     public void deleteMovie(@PathVariable Integer movieId) {
-        logger.debug("GATEWAY: deleting movie " + movieId);
+        logger.info("GATEWAY: deleting movie " + movieId);
         List<SeanceResponse> seances = reservationService.findSeancesByMovie(movieId);
         for (SeanceResponse seance : seances) {
             List<ReservationResponse> reservations = reservationService.findReservationBySeance(seance.getSeance_id());
@@ -96,14 +102,14 @@ public class GatewayRestController {
 
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/rate", method = RequestMethod.POST)
-    public void rateMovie(@RequestBody RatingRequest request) {
-        logger.debug("GATEWAY: rating movie " + request);
+    public void rateMovie(@Valid @RequestBody RatingRequest request) {
+        logger.info("GATEWAY: rating movie " + request);
         movieService.rateMovie(request.getUserId(), request.getMovieId(), request.getScore());
     }
 
     @RequestMapping(value = "/movie/{movieId}/seance", method = RequestMethod.GET)
     public List<SeanceComposite> getSeances(@PathVariable Integer movieId) {
-        logger.debug("GATEWAY: getting seances of the movie " + movieId);
+        logger.info("GATEWAY: getting seances of the movie " + movieId);
         List<SeanceResponse> seances = reservationService.findSeancesByMovie(movieId);
         MovieResponse movieResponse = movieService.findMovie(movieId);
 
@@ -112,9 +118,9 @@ public class GatewayRestController {
 
     @RequestMapping(value = "/seance/{seanceId}", method = RequestMethod.GET)
     public SeanceComposite getSeanceById(@PathVariable Integer seanceId) {
-        logger.debug("GATEWAY: getting seance " + seanceId);
+        logger.info("GATEWAY: getting seance " + seanceId);
         SeanceResponse seanceResponse = reservationService.findSeance(seanceId);
-        logger.debug("GATEWAY: got seance" + seanceResponse);
+        logger.info("GATEWAY: got seance" + seanceResponse);
         MovieResponse movieResponse = movieService.findMovie(seanceResponse.getMovie_id());
 
         return SeanceComposite.from(seanceResponse, movieResponse);
@@ -122,8 +128,8 @@ public class GatewayRestController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(value = "/seance", method = RequestMethod.POST)
-    public SeanceComposite createSeance(@RequestBody SeanceRequest seanceRequest, HttpServletResponse response) {
-        logger.debug("GATEWAY: creating seance " + seanceRequest);
+    public SeanceComposite createSeance(@Valid @RequestBody SeanceRequest seanceRequest, HttpServletResponse response) {
+        logger.info("GATEWAY: creating seance " + seanceRequest);
         SeanceResponse seanceResponse =
                 reservationService.createSeance(seanceRequest.getMovieId(), seanceRequest.getScreenDate());
         MovieResponse movieResponse = movieService.findMovie(seanceResponse.getMovie_id());
@@ -134,7 +140,7 @@ public class GatewayRestController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @RequestMapping(value = "/seance/{seanceId}", method = RequestMethod.DELETE)
     public void deleteSeance(@PathVariable Integer seanceId) {
-        logger.debug("GATEWAY: deleting seance " + seanceId);
+        logger.info("GATEWAY: deleting seance " + seanceId);
         List<ReservationResponse> reservations = reservationService.findReservationBySeance(seanceId);
         if (reservations == null) {
             return;
@@ -145,18 +151,25 @@ public class GatewayRestController {
 
     @RequestMapping(value = "/reservation/{reservationId}")
     public ReservationComposite getReservation(@PathVariable Integer reservationId) {
-        logger.debug("GATEWAY: getting reservation " + reservationId);
+        logger.info("GATEWAY: getting reservation " + reservationId);
         ReservationResponse reservationResponse =
                 reservationService.findReservation(reservationId);
-        BillResponse billResponse =
-                paymentService.findBill(reservationResponse.getBill_id());
+        BillResponse billResponse = null;
+        try
+        {
+            billResponse = paymentService.findBill(reservationResponse.getBill_id());
+        }
+        catch (RemoteServiceException ex) {
+            logger.info("GATEWAY: Payment service exception:" + ex.getMessage());
+            return ReservationComposite.from(reservationResponse);
+        }
 
         return ReservationComposite.from(reservationResponse, billResponse);
     }
 
     @RequestMapping(value = "/user/{userId}/reservation")
     public List<ReservationComposite> getReservationsForUser(@PathVariable Integer userId) {
-        logger.debug("GATEWAY: getting reservations for user " + userId);
+        logger.info("GATEWAY: getting reservations for user " + userId);
         List<ReservationResponse> reservationResponses = reservationService.getReservationByUser(userId);
 
         if (reservationResponses == null) {
@@ -175,8 +188,8 @@ public class GatewayRestController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(value = "/reservation", method = RequestMethod.POST)
-    public ReservationComposite createReservation(@RequestBody ReservationRequest request, HttpServletResponse response) {
-        logger.debug("GATEWAY: creating reservation " + request);
+    public ReservationComposite createReservation(@Valid @RequestBody ReservationRequest request, HttpServletResponse response) {
+        logger.info("GATEWAY: creating reservation " + request);
         ReservationResponse reservationResponse =
                 reservationService.createReservation(request.getSeanceId(), request.getUserId(), request.getSeatIds());
         BillResponse billResponse =
@@ -189,16 +202,37 @@ public class GatewayRestController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @RequestMapping(value = "/reservation/{reservationId}", method = RequestMethod.DELETE)
     public void deleteReservation(@PathVariable Integer reservationId) {
-        logger.debug("GATEWAY: deleting reservation " + reservationId);
-        ReservationResponse reservationResponse =
-                reservationService.findReservation(reservationId);
+        logger.info("GATEWAY: deleting reservation " + reservationId);
+        try {
+            ReservationResponse reservationResponse =
+                    reservationService.findReservation(reservationId);
 
-        if (reservationResponse == null) {
-            return;
+            if (reservationResponse == null) {
+                return;
+            }
+
+            paymentService.deleteBill(reservationResponse.getBill_id());
+            reservationService.deleteReservation(reservationId);
         }
+        catch (RemoteServiceException ex) {
+            queue.addTask(() ->
+            {
+                logger.info("TRYING AGAIN");
+                try {
+                    ReservationResponse reservationResponse =
+                            reservationService.findReservation(reservationId);
 
-        paymentService.deleteBill(reservationResponse.getBill_id());
-        reservationService.deleteReservation(reservationId);
+                    if (reservationResponse == null) {
+                        return true;
+                    }
+
+                    paymentService.deleteBill(reservationResponse.getBill_id());
+                    reservationService.deleteReservation(reservationId);
+                } catch (Exception x) { return false; }
+                return true;
+
+            });
+        }
     }
 
 

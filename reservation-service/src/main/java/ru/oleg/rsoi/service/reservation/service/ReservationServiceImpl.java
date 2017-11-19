@@ -16,6 +16,7 @@ import ru.oleg.rsoi.service.reservation.repository.SeatRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -69,10 +70,6 @@ public class ReservationServiceImpl implements ReservationService {
             throw new EntityNotFoundException("Not all seats exist!");
         }
 
-        if (seats.stream().anyMatch(x -> !x.isAvailable())) {
-            throw new SeatNotAvailableException("Some seat is not available");
-        }
-
         ReservationPriceCalculator calculator = new ReservationPriceCalculator(seatPriceRepository.findAll());
         int price = calculator.calculatePrice(seats);
 
@@ -92,6 +89,14 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public void deleteReservation(Integer id) {
-        reservationRepository.delete(id);
+        List<Seat> seats = seatRepository.findAll().stream()
+                .filter(x -> x.getReservation() != null && x.getReservation().getId().equals(id)).collect(Collectors.toList());
+
+        seats.forEach(x -> x.setReservation(null));
+        seatRepository.save(seats);
+
+        if (reservationRepository.exists(id)) {
+            reservationRepository.delete(id);
+        }
     }
 }

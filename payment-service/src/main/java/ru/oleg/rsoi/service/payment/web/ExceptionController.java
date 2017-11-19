@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.oleg.rsoi.dto.ErrorResponse;
+import ru.oleg.rsoi.errors.ApiErrorView;
+import ru.oleg.rsoi.errors.ApiErrorViewException;
 import ru.oleg.rsoi.remoteservice.RemoteServiceException;
 
 import javax.persistence.EntityNotFoundException;
@@ -29,5 +31,11 @@ public class ExceptionController {
     public ErrorResponse exception(Exception exception) {
         logger.error("Internal server error:" + exception.getMessage());
         return new ErrorResponse(exception.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ApiErrorViewException.class)
+    public ApiErrorView apiError(ApiErrorViewException exception) {
+        return exception.getView();
     }
 }

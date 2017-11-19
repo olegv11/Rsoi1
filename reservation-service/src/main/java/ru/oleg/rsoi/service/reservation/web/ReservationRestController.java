@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import ru.oleg.rsoi.dto.reservation.ReservationRequest;
 import ru.oleg.rsoi.dto.reservation.ReservationResponse;
@@ -12,6 +13,7 @@ import ru.oleg.rsoi.service.reservation.domain.Reservation;
 import ru.oleg.rsoi.service.reservation.service.ReservationService;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,14 @@ public class ReservationRestController {
 
     @Autowired
     ReservationService reservationService;
+
+    @Autowired
+    ReservationRequestValidator reservationRequestValidator;
+
+    @InitBinder("reservationRequest")
+    public void setupBinder(WebDataBinder binder) {
+        binder.addValidators(reservationRequestValidator);
+    }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ReservationResponse getReservation(@PathVariable Integer id) {
@@ -46,7 +56,7 @@ public class ReservationRestController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
-    public ReservationResponse createReservation(@RequestBody ReservationRequest reservationRequest,
+    public ReservationResponse createReservation(@Valid @RequestBody ReservationRequest reservationRequest,
                                        HttpServletResponse response) {
         logger.debug("RESERVATION: creating reservation " + reservationRequest);
         Reservation reservation = reservationService.makeReservation(reservationRequest);
