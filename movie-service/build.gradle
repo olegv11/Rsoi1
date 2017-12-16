@@ -43,6 +43,8 @@ dependencies {
     compile "org.projectlombok:lombok"
     compile "com.h2database:h2"
 
+    compile "org.springframework.boot:spring-boot-starter-security"
+
     testCompile 'junit:junit:4.12'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 
@@ -64,3 +66,5 @@ jacocoTestReport {
         })
     }
 }
+
+

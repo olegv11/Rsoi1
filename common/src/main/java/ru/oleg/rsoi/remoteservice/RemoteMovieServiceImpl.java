@@ -1,30 +1,43 @@
 package ru.oleg.rsoi.remoteservice;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.oleg.rsoi.dto.movie.MovieResponse;
 import ru.oleg.rsoi.dto.movie.MovieRequest;
 import ru.oleg.rsoi.dto.movie.RatingRequest;
+import ru.oleg.rsoi.serviceAuth.ServiceCredentials;
+import ru.oleg.rsoi.serviceAuth.ServiceTokens;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-@Component
+@Service
 public class RemoteMovieServiceImpl implements RemoteMovieService {
 
     private final RemoteRsoiServiceImpl<MovieRequest, MovieResponse> remoteService;
     private final RemoteRsoiServiceImpl<RatingRequest, Void> remoteRateService;
 
+    ServiceCredentials serviceCredentials;
+
+    ServiceTokens serviceTokens;
+
     @Autowired
-    public RemoteMovieServiceImpl(@Value("${urls.services.movies}") String movieServiceUrl) {
-        remoteService = new RemoteRsoiServiceImpl<>(movieServiceUrl, MovieResponse.class, MovieResponse[].class);
-        remoteRateService = new RemoteRsoiServiceImpl<>(movieServiceUrl, Void.class, Void[].class);
+    public RemoteMovieServiceImpl(@Value("${urls.services.movies}") String movieServiceUrl,
+                                  ServiceCredentials serviceCredentials,
+                                  @Qualifier("movieTokens") ServiceTokens serv) {
+        this.serviceCredentials = serviceCredentials;
+        this.serviceTokens = serv;
+
+        remoteService = new RemoteRsoiServiceImpl<>(movieServiceUrl, serviceCredentials, serviceTokens, MovieResponse.class, MovieResponse[].class);
+        remoteRateService = new RemoteRsoiServiceImpl<>(movieServiceUrl, serviceCredentials, serviceTokens, Void.class, Void[].class);
     }
 
     @Override

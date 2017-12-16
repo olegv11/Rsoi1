@@ -6,16 +6,16 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.oleg.rsoi.dto.ErrorResponse;
 import ru.oleg.rsoi.errors.ApiErrorView;
 import ru.oleg.rsoi.errors.ApiErrorViewException;
+import ru.oleg.rsoi.serviceAuth.ServiceCredentials;
+import ru.oleg.rsoi.serviceAuth.ServiceTokens;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -26,13 +26,77 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
     private final Class<Response> type;
     private final Class<Response[]> typeArray;
     private final String serviceUrl;
+    private final ServiceCredentials myCredentials;
+    private final ServiceTokens tokens;
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    public RemoteRsoiServiceImpl(String serviceUrl, Class<Response> responseClass, Class<Response[]> responseArrayClass) {
+    public RemoteRsoiServiceImpl(String serviceUrl, ServiceCredentials myCredentials, ServiceTokens tokens, Class<Response> responseClass, Class<Response[]> responseArrayClass) {
         this.serviceUrl = serviceUrl;
         this.type = responseClass;
         this.typeArray = responseArrayClass;
+
+        this.myCredentials = myCredentials;
+        this.tokens = tokens;
+    }
+
+
+    public HttpEntity<Request> createEntity(Request request) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        if (tokens != null && tokens.getAccessToken() != null && !tokens.getAccessToken().isEmpty()) {
+            headers.set("Authorization", "Bearer " + tokens.getAccessToken());
+        }
+        return new HttpEntity<>(request, headers);
+    }
+
+    public HttpEntity<Void> createEntity() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        if (tokens != null && tokens.getAccessToken() != null && !tokens.getAccessToken().isEmpty()) {
+            headers.set("Authorization", "Bearer " + tokens.getAccessToken());
+        }
+        return new HttpEntity<>(headers);
+    }
+
+    private boolean refreshTokens() {
+        if (tokens.getAccessToken() == null) {
+            return receiveTokens();
+        }
+
+        try {
+            ServiceTokens refreshed = rt.postForObject(getUrl("/auth/token"),
+                    tokens.getRefreshToken(), ServiceTokens.class);
+            tokens.setAccessToken(refreshed.getAccessToken());
+            tokens.setRefreshToken(refreshed.getRefreshToken());
+            return true;
+        }
+        catch (HttpStatusCodeException e) {
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                return receiveTokens();
+            }
+            return false;
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+
+    private boolean receiveTokens() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Basic " + myCredentials.toString());
+
+        try {
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            ServiceTokens newTokens = rt.exchange(getUrl("/auth/token"), HttpMethod.GET, entity, ServiceTokens.class).getBody();
+            tokens.setAccessToken(newTokens.getAccessToken());
+            tokens.setRefreshToken(newTokens.getRefreshToken());
+            return true;
+        }
+        catch (Exception ex) {
+            return false;
+        }
     }
 
     private final RestTemplate rt = new RestTemplate();
@@ -46,13 +110,20 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
     public Response create(Request request, String postfix) {
         ResponseEntity<Response> response;
 
+        HttpEntity<Request> entity = createEntity(request);
+
         try {
-            response = rt.postForEntity(getUrl(postfix), request, type);
+            response = rt.postForEntity(getUrl(postfix), entity, type);
         }
         catch (HttpStatusCodeException e) {
             if (e.getStatusCode() == HttpStatus.BAD_REQUEST)
             {
                 throw TryGetErrorView(e);
+            }
+
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                if (!refreshTokens()) throw TryGetError(e);
+                return create(request, postfix);
             }
             throw TryGetError(e);
         }
@@ -67,17 +138,24 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
         return response.getBody();
     }
 
+
     @Override
     public Response find(int id, String postfix) {
         ResponseEntity<Response> response;
 
+        HttpEntity<Void> entity = createEntity();
+
         try {
-            response = rt.getForEntity(getUrl(postfix), type, id);
+            response = rt.exchange(getUrl(postfix), HttpMethod.GET, entity, type, id);
         }
         catch (HttpStatusCodeException e) {
             if (e.getStatusCode() == HttpStatus.BAD_REQUEST)
             {
                 throw TryGetErrorView(e);
+            }
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                if (!refreshTokens()) throw TryGetError(e);
+                return find(id, postfix);
             }
             throw TryGetError(e);
         }
@@ -92,13 +170,20 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
     public List<Response> findAll(int id, String postfix) {
         String url = getUrl(postfix);
         ResponseEntity<Response[]> response;
+
+        HttpEntity<Void> entity = createEntity();
+
         try {
-            response = rt.getForEntity(getUrl(postfix), typeArray, id);
+            response = rt.exchange(getUrl(postfix), HttpMethod.GET, entity, typeArray, id);
         }
         catch (HttpStatusCodeException e) {
             if (e.getStatusCode() == HttpStatus.BAD_REQUEST)
             {
                 throw TryGetErrorView(e);
+            }
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                if (!refreshTokens()) throw TryGetError(e);
+                return findAll(id, postfix);
             }
             throw TryGetError(e);
         }
@@ -137,9 +222,27 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
 
     @Override
     public Page<HashMap<String, Object>> findAllPaged(Pageable page, String postfix) {
-        ResponseEntity<RestResponsePage<HashMap<String, Object>>> response
-                = rt.exchange(getUrl(postfix)+"?page="+page.getPageNumber()+"&size="+page.getPageSize(), HttpMethod.GET, null,
-                new ParameterizedTypeReference<RestResponsePage<HashMap<String, Object>>>() {});
+
+        ResponseEntity<RestResponsePage<HashMap<String, Object>>> response;
+        HttpEntity<Void> entity = createEntity();
+
+        try {
+            response = rt.exchange(getUrl(postfix)+"?page="+page.getPageNumber()+"&size="+page.getPageSize(), HttpMethod.GET, entity,
+            new ParameterizedTypeReference<RestResponsePage<HashMap<String, Object>>>() {});
+        } catch (HttpStatusCodeException e) {
+            if (e.getStatusCode() == HttpStatus.BAD_REQUEST)
+            {
+                throw TryGetErrorView(e);
+            }
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                if (!refreshTokens()) throw TryGetError(e);
+                return findAllPaged(page, postfix);
+            }
+            throw TryGetError(e);
+        }
+        catch (ResourceAccessException access) {
+            throw new RemoteServiceAccessException("Не удалось связаться с удалённым сервером", getUrl(postfix));
+        }
 
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody().pageImpl();
@@ -150,7 +253,17 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
 
     @Override
     public void update(int id, Request request, String postfix) {
-        rt.exchange(getUrl(postfix), HttpMethod.PUT, new HttpEntity<Request>(request), Void.class, id);
+        HttpEntity<Request> entity = createEntity(request);
+
+        try {
+            rt.exchange(getUrl(postfix), HttpMethod.PUT, entity, Void.class, id);
+        }
+        catch (HttpStatusCodeException e) {
+           if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+               if (!refreshTokens()) throw TryGetError(e);
+               update(id, request, postfix);
+           }
+        }
     }
 
     @Override
@@ -160,7 +273,15 @@ public class RemoteRsoiServiceImpl<Request, Response> implements RemoteRsoiServi
 
     @Override
     public void delete(int id, String postfix) {
-        rt.delete(getUrl(postfix), id);
+        HttpEntity<Void> entity = createEntity();
+
+
+        try {
+            rt.exchange(getUrl(postfix), HttpMethod.DELETE, entity, Void.class, id);
+        } catch (RestClientException e) {
+            if (!refreshTokens()) throw e;
+            delete(id, postfix);
+        }
     }
 }
 

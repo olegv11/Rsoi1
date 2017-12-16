@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.oleg.rsoi.dto.gateway.MovieComposite;
 import ru.oleg.rsoi.dto.gateway.ReservationComposite;
@@ -15,17 +16,14 @@ import ru.oleg.rsoi.dto.gateway.SeanceComposite;
 import ru.oleg.rsoi.dto.movie.MovieRequest;
 import ru.oleg.rsoi.dto.movie.MovieResponse;
 import ru.oleg.rsoi.dto.movie.RatingRequest;
+import ru.oleg.rsoi.dto.payment.BillRequest;
 import ru.oleg.rsoi.dto.payment.BillResponse;
 import ru.oleg.rsoi.dto.reservation.ReservationRequest;
 import ru.oleg.rsoi.dto.reservation.ReservationResponse;
 import ru.oleg.rsoi.dto.reservation.SeanceRequest;
 import ru.oleg.rsoi.dto.reservation.SeanceResponse;
-import ru.oleg.rsoi.remoteservice.RemoteMovieService;
-import ru.oleg.rsoi.remoteservice.RemotePaymentService;
-import ru.oleg.rsoi.remoteservice.RemoteReservationService;
-import ru.oleg.rsoi.remoteservice.RemoteServiceException;
+import ru.oleg.rsoi.remoteservice.*;
 import ru.oleg.rsoi.service.gateway.Queue;
-import ru.oleg.rsoi.service.reservation.web.ExceptionController;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -47,6 +45,9 @@ public class GatewayRestController {
 
     @Autowired
     RemoteReservationService reservationService;
+
+    @Autowired
+    RemoteClientService clientService;
 
     @Autowired
     Queue queue;
@@ -190,13 +191,33 @@ public class GatewayRestController {
     @RequestMapping(value = "/reservation", method = RequestMethod.POST)
     public ReservationComposite createReservation(@Valid @RequestBody ReservationRequest request, HttpServletResponse response) {
         logger.info("GATEWAY: creating reservation " + request);
+
         ReservationResponse reservationResponse =
                 reservationService.createReservation(request.getSeanceId(), request.getUserId(), request.getSeatIds());
-        BillResponse billResponse =
-                paymentService.findBill(reservationResponse.getBill_id());
+
+        BillResponse billResponse;
+        try {
+             billResponse = paymentService.createBill(reservationResponse.getAmount());
+        }
+        catch (RemoteServiceException ex) {
+            logger.info("GATEWAY: ERROR CREATING BILL. ROLLING BACK RESERVATION");
+            reservationService.deleteReservation(reservationResponse.getId());
+            throw ex;
+        }
+
+        reservationService.bindReservation(reservationResponse.getId(), billResponse.getBillId());
+        reservationResponse.setBill_id(billResponse.getBillId());
 
         response.addHeader(HttpHeaders.LOCATION, "/reservation/" + reservationResponse.getId());
         return ReservationComposite.from(reservationResponse, billResponse);
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(value ="/bill", method = RequestMethod.POST)
+    public BillResponse createBill(@Valid BillRequest request, HttpServletResponse response) {
+        logger.info("GATEWAY: creating bill");
+
+        return paymentService.createBill(request.getAmount());
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -214,7 +235,7 @@ public class GatewayRestController {
             paymentService.deleteBill(reservationResponse.getBill_id());
             reservationService.deleteReservation(reservationId);
         }
-        catch (RemoteServiceException ex) {
+        catch (Exception ex) {
             queue.addTask(() ->
             {
                 logger.info("TRYING AGAIN");
@@ -233,6 +254,27 @@ public class GatewayRestController {
 
             });
         }
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/user/authenticated", method = RequestMethod.POST)
+    public ResponseEntity<Void> isAuthenticated(@RequestBody String token) {
+        if (!clientService.isAuthenticated(token)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/user/refresh", method = RequestMethod.POST)
+    public ResponseEntity<TokenPair> refresh(@RequestBody String token) {
+        TokenPair tokens = clientService.refreshToken(token);
+        if (tokens == null) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>(tokens, HttpStatus.OK);
     }
 
 

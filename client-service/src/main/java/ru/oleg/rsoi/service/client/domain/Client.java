@@ -1,16 +1,15 @@
 package ru.oleg.rsoi.service.client.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.google.common.hash.Hashing;
+import lombok.*;
 import lombok.experimental.Accessors;
 import ru.oleg.rsoi.dto.client.ClientResponse;
 
 import javax.persistence.*;
+import java.nio.charset.StandardCharsets;
 
 @Data
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
 @Table(name = "client")
@@ -20,9 +19,20 @@ public class Client {
     private Integer id;
 
     @Column
-    private String name;
+    private String username;
+
+    @Column
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    public static String passwordToHash(String password) {
+        return Hashing.sha256().hashString(password + "myAwesomeSalt", StandardCharsets.UTF_8).toString();
+    }
+
 
     public ClientResponse toResponse() {
-        return new ClientResponse(id, name);
+        return new ClientResponse(id, username);
     }
 }

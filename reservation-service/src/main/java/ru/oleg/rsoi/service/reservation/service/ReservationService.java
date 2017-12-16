@@ -10,5 +10,7 @@ public interface ReservationService {
     List<Reservation> getBySeance(Integer seanceId);
     List<Reservation> getByUser(Integer user_id);
     Reservation makeReservation(ReservationRequest request);
+    Reservation bindReservationToBill(Integer reservationId, Integer billId);
     void deleteReservation(Integer id);
+    int getPriceOf(Reservation reservation);
 }

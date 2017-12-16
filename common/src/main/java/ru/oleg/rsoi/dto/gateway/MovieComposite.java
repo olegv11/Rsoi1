@@ -3,6 +3,7 @@ package ru.oleg.rsoi.dto.gateway;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.hibernate.validator.constraints.NotBlank;
 import ru.oleg.rsoi.dto.movie.MovieResponse;
 
 @Data
@@ -10,7 +11,9 @@ import ru.oleg.rsoi.dto.movie.MovieResponse;
 public class MovieComposite {
     private Integer movieId;
     private Double averageRating;
+    @NotBlank(message = "Name should not be empty")
     private String name;
+    @NotBlank(message = "Description should not be empty")
     private String description;
 
 

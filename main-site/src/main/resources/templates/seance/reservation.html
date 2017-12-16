@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Rsoi!</title>
+
+    <!--/*/ <th:block th:include="fragments/headerinc :: head"></th:block> /*/-->
+</head>
+<body>
+<div class="container">
+    <!--/*/ <th:block th:include="fragments/header :: header"></th:block> /*/-->
+    <h2>Reservation Details</h2>
+    <div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-2 control-label">Reservation Id</label>
+                <div class="col-md-10"><p class="form-control-static" th:text="${reservation.reservationId}">Movie name</p></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Amount</label>
+                <div class="col-md-10"><p class="form-control-static" th:text="${reservation.amount}">Amount</p></div>
+            </div>
+        </form>
+    </div>
+
+    <h2>Seats</h2>
+    <div th:if="${not #lists.isEmpty(reservation.seats)}">
+
+            <table class="table table-striped">
+                <tr>
+                    <th>Chair</th>
+                </tr>
+                <tr th:each="seat : ${reservation.seats}">
+                    <td th:text="${seat.seatId}"></td>
+                </tr>
+            </table>
+    </div>
+
+</div>
+</body>
+</html>

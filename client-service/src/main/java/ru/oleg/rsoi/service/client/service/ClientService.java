@@ -8,6 +8,7 @@ import ru.oleg.rsoi.service.client.domain.Client;
 
 public interface ClientService {
     Page<Client> get(Pageable page);
+    Client getByUsername(String username);
     Client getById(Integer id);
     Client save(ClientRequest clientRequest);
     void deleteById(Integer id);

@@ -33,6 +33,9 @@ repositories {
 }
 
 dependencies {
+    compile "org.springframework.boot:spring-boot-starter-thymeleaf"
+    compile "org.springframework.data:spring-data-rest-webmvc"
+    compile "org.springframework.boot:spring-boot-devtools"
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-logging"
@@ -41,6 +44,13 @@ dependencies {
     compile "org.postgresql:postgresql"
     compile "org.projectlombok:lombok"
     compile "com.h2database:h2"
+    compile "com.google.guava:guava:20.0"
+
+    compile "org.springframework.boot:spring-boot-starter-security"
+    compile "org.springframework.security.oauth:spring-security-oauth2"
+
+    compile "org.webjars:bootstrap:3.3.7"
+    compile "org.webjars:jquery:3.1.1"
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 

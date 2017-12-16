@@ -19,4 +19,5 @@ public class ReservationResponse {
     Integer bill_id;
     Integer user_id;
     List<SeatResponse> seats;
+    Integer amount;
 }

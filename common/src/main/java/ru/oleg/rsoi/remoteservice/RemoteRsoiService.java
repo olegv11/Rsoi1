@@ -20,6 +20,7 @@ public interface RemoteRsoiService<Request, Response> {
      */
     Response create(Request request, String postfix);
 
+
     /**
      * Запрос на поиск объекта по идентификатору
      */

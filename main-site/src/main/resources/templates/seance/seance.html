@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Rsoi!</title>
+
+    <!--/*/ <th:block th:include="fragments/headerinc :: head"></th:block> /*/-->
+</head>
+<body>
+<div class="container">
+    <!--/*/ <th:block th:include="fragments/header :: header"></th:block> /*/-->
+    <h2>Seance Details</h2>
+    <div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-2 control-label">Movie name</label>
+                <div class="col-md-10"><p class="form-control-static" th:text="${seance.movieName}">Movie name</p></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Id</label>
+                <div class="col-md-10"><p class="form-control-static" th:text="${seance.seanceId}">Seance Id</p></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Date</label>
+                <div class="col-md-10"><p class="form-control-static" th:text="${seance.date}">Seance date</p></div>
+            </div>
+        </form>
+    </div>
+
+    <form class="form-horizontal" th:object="${seance}" th:action="@{/seance/} + ${seance.seanceId} + '/delete'"
+          th:method="post">
+        <input type="hidden" th:field="*{seanceId}"/>
+        <input type="hidden" th:field="*{movieId}"/>
+        <button type="submit">
+            <span class="glyphicon glyphicon-minus">Delete seance</span>
+        </button>
+    </form>
+
+    <h2>Seances</h2>
+    <div th:if="${not #lists.isEmpty(seance.seats)}">
+        <form class="form-horizontal" th:object="${reservation}" th:action="@{'/seance/'+${seance.seanceId}}"
+              th:method="post">
+            <input type="submit" value="Order"/>
+            <input type="hidden" class="form-control" th:field="*{seanceId}"/>
+            <input type="hidden" class="form-control" th:field="*{userId}"/>
+            <p/>
+
+            <table class="table table-striped">
+                <tr>
+                    <th>Chair</th>
+                    <th>Order</th>
+                    <th/>
+                </tr>
+                <tr th:each="seat : ${seance.seats}" th:style="${seat.isAvailable} ? '' : 'background-color:#F44242'">
+                    <td th:text="${seat.seatId}"></td>
+                    <td>
+                        <input name="seats" type="checkbox" th:value="${seat.seatId}"
+                           th:disabled="${seat.isAvailable} ? 'false' : 'true'"/>
+                    </td>
+                    <td><a th:if="${takenSeats != null and #lists.contains(takenSeats, seat.seatId)}">Seat was taken!</a></td>
+                </tr>
+
+            </table>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.oleg.rsoi.dto.payment.BillResponse;
 import ru.oleg.rsoi.dto.reservation.ReservationRequest;
+import ru.oleg.rsoi.remoteservice.RemoteGatewayService;
 import ru.oleg.rsoi.remoteservice.RemotePaymentService;
 import ru.oleg.rsoi.service.reservation.domain.Reservation;
 import ru.oleg.rsoi.service.reservation.domain.Seance;
@@ -33,7 +34,7 @@ public class ReservationServiceImpl implements ReservationService {
     SeatPriceRepository seatPriceRepository;
 
     @Autowired
-    RemotePaymentService paymentService;
+    RemoteGatewayService gatewayService;
 
     @Override
     @Transactional(readOnly = true)
@@ -70,20 +71,29 @@ public class ReservationServiceImpl implements ReservationService {
             throw new EntityNotFoundException("Not all seats exist!");
         }
 
-        ReservationPriceCalculator calculator = new ReservationPriceCalculator(seatPriceRepository.findAll());
-        int price = calculator.calculatePrice(seats);
-
-        BillResponse bill = paymentService.createBill(price);
-
         Reservation reservation = new Reservation()
                 .setUserId(request.getUserId())
                 .setSeance(seance)
-                .setSeats(seats)
-                .setBillId(bill.getBillId());
+                .setSeats(seats);
+
         seats.forEach(x -> x.setAvailable(false));
         seats.forEach(x -> x.setReservation(reservation));
 
         return reservationRepository.save(reservation);
+    }
+
+    @Override
+    public Reservation bindReservationToBill(Integer reservationId, Integer billId) {
+        Reservation reservation = reservationRepository.findOne(reservationId);
+
+        if (reservation == null) {
+            throw new EntityNotFoundException("Reservation("+reservationId+") does not exist");
+        }
+
+        reservation.setBillId(billId);
+        reservationRepository.save(reservation);
+
+        return reservation;
     }
 
     @Override
@@ -98,5 +108,11 @@ public class ReservationServiceImpl implements ReservationService {
         if (reservationRepository.exists(id)) {
             reservationRepository.delete(id);
         }
+    }
+
+    @Override
+    public int getPriceOf(Reservation reservation) {
+        ReservationPriceCalculator calculator = new ReservationPriceCalculator(seatPriceRepository.findAll());
+        return calculator.calculatePrice(reservation.getSeats());
     }
 }

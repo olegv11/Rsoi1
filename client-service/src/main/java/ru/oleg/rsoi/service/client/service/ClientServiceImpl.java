@@ -23,6 +23,11 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public Client getByUsername(String username) {
+        return clientRepository.findByUsername(username);
+    }
+
+    @Override
     public Client getById(Integer id) {
         Client client = clientRepository.findOne(id);
         if (client == null) {
@@ -34,7 +39,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public Client save(ClientRequest clientRequest) {
         Client client = new Client()
-                .setName(clientRequest.getName());
+                .setUsername(clientRequest.getName());
         return clientRepository.save(client);
     }
 

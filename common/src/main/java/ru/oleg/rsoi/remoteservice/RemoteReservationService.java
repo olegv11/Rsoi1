@@ -17,5 +17,6 @@ public interface RemoteReservationService {
     List<ReservationResponse> findReservationBySeance(int seanceId);
     List<ReservationResponse> getReservationByUser(int userId);
     ReservationResponse createReservation(int seanceId, int userId, List<Integer> seatIds);
+    ReservationResponse bindReservation(int reservationId, int billId);
     void deleteReservation(int id);
 }

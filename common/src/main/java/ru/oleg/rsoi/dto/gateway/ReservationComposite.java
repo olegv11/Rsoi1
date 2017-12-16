@@ -19,9 +19,7 @@ public class ReservationComposite {
     List<SeatComposite> seats;
 
     public static ReservationComposite from(ReservationResponse reservationResponse, BillResponse billResponse) {
-        if (!Objects.equals(reservationResponse.getBill_id(), billResponse.getBillId())) {
-            throw new IllegalArgumentException("Bill Ids should be same");
-        }
+
         return new ReservationComposite()
                 .setReservationId(reservationResponse.getId())
                 .setSeanceId(reservationResponse.getSeance_id())

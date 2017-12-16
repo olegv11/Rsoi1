@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Rsoi!</title>
+
+    <!--/*/ <th:block th:include="fragments/headerinc :: head"></th:block> /*/-->
+</head>
+<body>
+<div class="container">
+    <!--/*/ <th:block th:include="fragments/header :: header"></th:block> /*/-->
+    <h2>Movie Details</h2>
+    <div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-2 control-label">Id</label>
+                <div class="col-md-10"><p class="form-control-static" th:text="${movie.movieId}">Movie Id</p></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Name</label>
+                <div class="col-md-10"><p class="form-control-static" th:text="${movie.name}">Movie Name</p></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Description</label>
+                <div class="col-md-10"><p class="form-control-static" th:text="${movie.description}">Movie Name</p></div>
+            </div>
+        </form>
+    </div>
+
+    <form class="form-horizontal" th:action="@{/movie/} + ${movie.movieId} + '/delete'"
+          th:method="post">
+        <button type="submit" class="btn btn-default">
+            <span class="glyphicon glyphicon-minus">Delete movie</span>
+        </button>
+    </form>
+    <p/>
+
+    <a th:href="@{/movie/} + ${movie.movieId} + '/seance/create'" class="btn btn-default">
+        <span class="glyphicon glyphicon-plus"></span> Add Seance
+    </a>
+
+    <p></p>
+
+    <h2>Seances</h2>
+    <div th:if="${not #lists.isEmpty(seances)}">
+        <table class="table table-striped">
+            <tr>
+                <th>Id</th>
+                <th>Date</th>
+                <th/><th/>
+            </tr>
+            <tr th:each="seance : ${seances}">
+                <td><a th:text="${seance.seanceId}" th:href="@{'/seance/'+${seance.seanceId}}">Id</a></td>
+                <td><a th:text="${seance.date}">Date</a></td>
+                <td><a th:href="@{'/seance/'+${seance.seanceId}+'/edit'}">Edit</a></td>
+                <td><a th:href="@{'/seance/'+${seance.seanceId}+'/delete'}">Delete</a></td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

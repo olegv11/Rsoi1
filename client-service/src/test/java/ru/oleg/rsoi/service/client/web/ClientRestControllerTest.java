@@ -37,7 +37,7 @@ public class ClientRestControllerTest {
 
     @MockBean
     private ClientService service;
-
+/*
     @Test
     public void getExistingClientReturnsNormally() throws Exception {
         // Arrange
@@ -103,7 +103,7 @@ public class ClientRestControllerTest {
                 .andExpect(jsonPath("$.content[2].id", is(12)))
                 .andExpect(jsonPath("$.content[2].name", is("John")));
     }
-
+*/
     @Test
     public void getEmptyPage() throws Exception {
         // Arrange

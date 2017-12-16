@@ -10,6 +10,9 @@ import ru.oleg.rsoi.service.reservation.domain.Reservation;
 import ru.oleg.rsoi.service.reservation.domain.Seat;
 import ru.oleg.rsoi.service.reservation.repository.SeatRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class ReservationRequestValidator implements Validator {
 
@@ -25,16 +28,18 @@ public class ReservationRequestValidator implements Validator {
     public void validate(Object target, Errors errors) {
         ReservationRequest request = (ReservationRequest)target;
 
-        for (Integer seatId : request.getSeatIds()) {
+        List<Integer> seatIds = request.getSeatIds();
+        for (int i = 0; i < seatIds.size(); i++) {
+            Integer seatId = seatIds.get(i);
             Seat seat = seatRepository.findOne(seatId);
             if (seat == null) {
-                errors.rejectValue("seatIds", seatId.toString(), ApiErrorCode.SEAT_NOT_EXISTS.getCode());
-                continue;
+                errors.rejectValue("seatIds["+i+"]", ApiErrorCode.SEAT_NOT_EXISTS.getCode(),
+                        "Seat does not exist");
             }
-            if (!seat.isAvailable()) {
-                errors.rejectValue("seatIds", seatId.toString(), ApiErrorCode.SEAT_TAKEN.getCode());
+            else if (!seat.isAvailable()) {
+                errors.rejectValue("seatIds["+i+"]", ApiErrorCode.SEAT_TAKEN.getCode(),
+                        "Seat taken");
             }
         }
-
     }
 }

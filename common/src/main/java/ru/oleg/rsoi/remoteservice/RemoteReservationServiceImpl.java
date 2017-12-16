@@ -1,14 +1,18 @@
 package ru.oleg.rsoi.remoteservice;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import ru.oleg.rsoi.dto.reservation.ReservationRequest;
 import ru.oleg.rsoi.dto.reservation.ReservationResponse;
 import ru.oleg.rsoi.dto.reservation.SeanceRequest;
 import ru.oleg.rsoi.dto.reservation.SeanceResponse;
 import org.springframework.data.domain.Page;
+import ru.oleg.rsoi.serviceAuth.ServiceCredentials;
+import ru.oleg.rsoi.serviceAuth.ServiceTokens;
 
 
 import java.util.Date;
@@ -21,11 +25,21 @@ public class RemoteReservationServiceImpl implements RemoteReservationService {
     private final RemoteRsoiServiceImpl<ReservationRequest, ReservationResponse> remoteReservationService;
 
     @Autowired
+    ServiceCredentials myCredentials;
+
+    @Autowired
+    @Qualifier(value = "reservationTokens")
+    ServiceTokens reservationTokens;
+
+
+    private final RestTemplate rt = new RestTemplate();
+
+    @Autowired
     public RemoteReservationServiceImpl(@Value("${urls.services.reservations}") String reservationServiceUrl) {
-        remoteSeanceService = new RemoteRsoiServiceImpl<>(reservationServiceUrl,
+        remoteSeanceService = new RemoteRsoiServiceImpl<>(reservationServiceUrl, myCredentials, reservationTokens,
                 SeanceResponse.class, SeanceResponse[].class);
 
-        remoteReservationService = new RemoteRsoiServiceImpl<>(reservationServiceUrl,
+        remoteReservationService = new RemoteRsoiServiceImpl<>(reservationServiceUrl, myCredentials, reservationTokens,
                 ReservationResponse.class, ReservationResponse[].class);
     }
 
@@ -78,6 +92,11 @@ public class RemoteReservationServiceImpl implements RemoteReservationService {
     public ReservationResponse createReservation(int seanceId, int userId, List<Integer> seatIds) {
         ReservationRequest rr = new ReservationRequest(seanceId, userId, seatIds);
         return remoteReservationService.create(rr, "/reservation");
+    }
+
+    @Override
+    public ReservationResponse bindReservation(int reservationId, int billId) {
+        return rt.postForObject("http://localhost:8092/reservation/"+reservationId+"/bill", new Integer(billId), ReservationResponse.class);
     }
 
     @Override

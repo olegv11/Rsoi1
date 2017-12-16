@@ -11,7 +11,7 @@ public class ClientTest {
     public void toResponseTest()  {
         ClientResponse createdResponse = new Client()
                 .setId(2)
-                .setName("abc")
+                .setUsername("abc")
                 .toResponse();
         ClientResponse trueResponse = new ClientResponse(2, "abc");
 

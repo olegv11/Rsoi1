@@ -60,9 +60,24 @@ public class ReservationRestController {
                                        HttpServletResponse response) {
         logger.debug("RESERVATION: creating reservation " + reservationRequest);
         Reservation reservation = reservationService.makeReservation(reservationRequest);
+
+        ReservationResponse r = reservation.toResponse();
+        int amount = reservationService.getPriceOf(reservation);
+        r.setAmount(amount);
+
+        response.addHeader(HttpHeaders.LOCATION, "/reservation/" + reservation.getId());
+        return r;
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(value = "/{id}/bill", method = RequestMethod.POST)
+    public ReservationResponse bindReservation(@PathVariable Integer id, @RequestBody Integer billId,
+                                               HttpServletResponse response) {
+        Reservation reservation = reservationService.bindReservationToBill(id, billId);
         response.addHeader(HttpHeaders.LOCATION, "/reservation/" + reservation.getId());
         return reservation.toResponse();
     }
+
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)

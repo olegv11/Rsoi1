@@ -1,19 +1,22 @@
-package ru.oleg.rsoi.service.reservation.web;
+package ru.oleg.rsoi.service.gateway.web;
 
 
+import com.fasterxml.jackson.core.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import ru.oleg.rsoi.dto.ErrorResponse;
 import ru.oleg.rsoi.errors.ApiErrorView;
 import ru.oleg.rsoi.errors.ApiErrorViewException;
+import ru.oleg.rsoi.errors.ApiGlobalError;
 import ru.oleg.rsoi.remoteservice.RemoteServiceException;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestControllerAdvice(annotations = RestController.class)
 public class ExceptionController {
@@ -45,6 +48,6 @@ public class ExceptionController {
     public ApiErrorView apiError(ApiErrorViewException exception) {
         return exception.getView();
     }
-
 }
+
 
