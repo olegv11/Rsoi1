@@ -19,6 +19,7 @@ public class AuthenticationEnricherInterceptor extends HandlerInterceptorAdapter
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response,
                            Object object, ModelAndView model) throws Exception {
-        model.addObject("isAuthenticated", Util.checkAuthorizationAndTryRefresh(request, response, gatewayService));
+        boolean isAuthorized = Util.checkAuthorizationAndTryRefresh(request, response, gatewayService);
+        model.addObject("isAuthenticated", isAuthorized);
     }
 }

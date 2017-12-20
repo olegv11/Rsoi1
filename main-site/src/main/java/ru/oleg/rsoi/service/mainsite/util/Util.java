@@ -24,7 +24,7 @@ public class Util {
 
     static public boolean isAuthenticated(HttpServletRequest request, RemoteGatewayService service) {
         String token = getAccessCookie(request);
-        if (token != null && token.isEmpty()) return false;
+        if (token == null || token.isEmpty()) return false;
         return service.isAuthenticated(token);
     }
 
