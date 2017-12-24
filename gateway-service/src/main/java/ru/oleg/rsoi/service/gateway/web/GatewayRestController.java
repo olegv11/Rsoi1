@@ -1,8 +1,11 @@
 package ru.oleg.rsoi.service.gateway.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,8 +25,10 @@ import ru.oleg.rsoi.dto.reservation.ReservationRequest;
 import ru.oleg.rsoi.dto.reservation.ReservationResponse;
 import ru.oleg.rsoi.dto.reservation.SeanceRequest;
 import ru.oleg.rsoi.dto.reservation.SeanceResponse;
+import ru.oleg.rsoi.dto.statistics.ReservationOrderedEventRequest;
 import ru.oleg.rsoi.remoteservice.*;
 import ru.oleg.rsoi.service.gateway.Queue;
+import ru.oleg.rsoi.service.gateway.Statistics.Statistics;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -50,7 +55,18 @@ public class GatewayRestController {
     RemoteClientService clientService;
 
     @Autowired
+    @Qualifier("retryQueue")
     Queue queue;
+
+    @Autowired
+    @Qualifier("statQueue")
+    Queue statQueue;
+
+    ObjectMapper om = new ObjectMapper();
+
+
+    @Autowired
+    Statistics statistics;
 
     @RequestMapping(value = "/movie", method = RequestMethod.GET)
     public Page<MovieComposite> getMovies(Pageable page) {
@@ -207,6 +223,24 @@ public class GatewayRestController {
 
         reservationService.bindReservation(reservationResponse.getId(), billResponse.getBillId());
         reservationResponse.setBill_id(billResponse.getBillId());
+
+        statQueue.addTask(() -> {
+            ReservationOrderedEventRequest eventRequest = new ReservationOrderedEventRequest();
+            eventRequest.setChairs(reservationResponse.getSeats().size());
+            eventRequest.setPrice(reservationResponse.getAmount());
+            String json;
+            try {
+                json = om.writeValueAsString(eventRequest);
+            }
+            catch (JsonProcessingException ex) {
+                logger.error("ERROR IN JSON");
+                return true;
+            }
+
+            statistics.sendMessage(json, "reservationOrdered");
+
+           return true;
+        });
 
         response.addHeader(HttpHeaders.LOCATION, "/reservation/" + reservationResponse.getId());
         return ReservationComposite.from(reservationResponse, billResponse);

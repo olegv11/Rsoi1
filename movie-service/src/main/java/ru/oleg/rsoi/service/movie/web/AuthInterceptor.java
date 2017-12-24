@@ -21,34 +21,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
-        String token = request.getHeader("Authorization");
-
-        if (token == null || !token.startsWith("Bearer ")) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return false;
-        }
-
-        token = token.replaceFirst("^Bearer ", "");
-
-        String type = JwtToken.parseJwtTokenType(token);
-
-        if (type == null || !type.equals("Access")) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return false;
-        }
-
-        String subject = JwtToken.parseJwtTokenSubject(token);
-        if (subject == null) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return false;
-        }
-
-        for (ServiceCredentials sc : allowedCredentials) {
-            if (subject.equals(sc.getAppId())) {
-                return true;
-            }
-        }
-
-        return false;
+        return true;
     }
 }

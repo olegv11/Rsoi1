@@ -20,8 +20,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Client client = repository.findByUsername(username);
         String t = new BCryptPasswordEncoder().encode("test");
+        Client client = repository.findByUsername(username);
         if (client == null) {
             throw new UsernameNotFoundException(username);
         }

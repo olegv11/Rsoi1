@@ -1,16 +1,14 @@
-package ru.oleg.rsoi.service.gateway;
+package ru.oleg.rsoi.service.stat;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(scanBasePackages = {"ru.oleg.rsoi", "ru.oleg.rsoi.serviceAuth"})
 @EnableSpringDataWebSupport
-@EnableScheduling
-public class GatewayService {
+public class StatisticsService {
     public static void main(String[] args) {
-            SpringApplication.run(GatewayService.class, args);
+            SpringApplication.run(StatisticsService.class, args);
     }
 }
 
