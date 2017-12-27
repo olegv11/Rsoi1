@@ -10,6 +10,7 @@ import ru.oleg.rsoi.dto.movie.RatingRequest;
 import ru.oleg.rsoi.dto.payment.BillResponse;
 import ru.oleg.rsoi.dto.reservation.ReservationRequest;
 import ru.oleg.rsoi.dto.reservation.SeanceRequest;
+import ru.oleg.rsoi.dto.statistics.StatisticsResponse;
 
 import java.util.List;
 
@@ -34,5 +35,8 @@ public interface RemoteGatewayService {
     BillResponse createBill(Integer amount);
 
     boolean isAuthenticated(String token);
+    boolean isAdmin(String token);
     TokenPair refreshToken(String refreshToken);
+    void logout(String token);
+    StatisticsResponse statistics();
 }

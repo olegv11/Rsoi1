@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.oleg.rsoi.dto.gateway.MovieComposite;
 import ru.oleg.rsoi.dto.gateway.ReservationComposite;
 import ru.oleg.rsoi.dto.gateway.SeanceComposite;
@@ -25,6 +26,7 @@ import ru.oleg.rsoi.dto.reservation.ReservationRequest;
 import ru.oleg.rsoi.dto.reservation.ReservationResponse;
 import ru.oleg.rsoi.dto.reservation.SeanceRequest;
 import ru.oleg.rsoi.dto.reservation.SeanceResponse;
+import ru.oleg.rsoi.dto.statistics.StatisticsResponse;
 import ru.oleg.rsoi.serviceAuth.ServiceCredentials;
 import ru.oleg.rsoi.serviceAuth.ServiceTokens;
 
@@ -166,6 +168,24 @@ public class RemoteGatewayServiceImpl implements RemoteGatewayService {
     }
 
     @Override
+    public boolean isAdmin(String token) {
+        RestTemplate rt = new RestTemplate();
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(gatewayUrl+"/user/isAdmin")
+                .queryParam("token", token);
+
+        ResponseEntity<Boolean> response;
+
+        try {
+            response = rt.getForEntity(builder.build().encode().toUri(), Boolean.class);
+        }
+        catch (RestClientException e) {
+            return false;
+        }
+
+        return response.getBody();
+    }
+
+    @Override
     public TokenPair refreshToken(String refreshToken) {
         RestTemplate rt = new RestTemplate();
         try {
@@ -176,5 +196,23 @@ public class RemoteGatewayServiceImpl implements RemoteGatewayService {
         } catch (RestClientException e) {
             return null;
         }
+    }
+
+    @Override
+    public void logout(String token) {
+        RestTemplate rt = new RestTemplate();
+        try {
+            ResponseEntity<Void> response = rt.postForEntity(gatewayUrl+"/user/logout",
+                    token, Void.class);
+        } catch (RestClientException e) {
+        }
+    }
+
+    @Override
+    public StatisticsResponse statistics() {
+        RestTemplate rt = new RestTemplate();
+        ResponseEntity<StatisticsResponse> response =
+                rt.getForEntity(gatewayUrl+"/statistics", StatisticsResponse.class);
+        return response.getBody();
     }
 }

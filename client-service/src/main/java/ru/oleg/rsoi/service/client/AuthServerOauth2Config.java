@@ -1,6 +1,7 @@
 package ru.oleg.rsoi.service.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.token.TokenService;
@@ -24,6 +25,7 @@ public class AuthServerOauth2Config extends AuthorizationServerConfigurerAdapter
     private DataSource dataSource;
 
     @Autowired
+    @Qualifier("oauthTokenStore")
     private TokenStore tokenStore;
 
     @Autowired
@@ -46,7 +48,7 @@ public class AuthServerOauth2Config extends AuthorizationServerConfigurerAdapter
                 .authorizedGrantTypes("password", "authorization_code", "refresh_token")
                 .scopes("read")
                 .autoApprove(true)
-                .accessTokenValiditySeconds(60);
+                .accessTokenValiditySeconds(600);
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import ru.oleg.rsoi.dto.gateway.MovieComposite;
 import ru.oleg.rsoi.dto.gateway.ReservationComposite;
 import ru.oleg.rsoi.dto.gateway.SeanceComposite;
@@ -26,6 +27,8 @@ import ru.oleg.rsoi.dto.reservation.ReservationResponse;
 import ru.oleg.rsoi.dto.reservation.SeanceRequest;
 import ru.oleg.rsoi.dto.reservation.SeanceResponse;
 import ru.oleg.rsoi.dto.statistics.ReservationOrderedEventRequest;
+import ru.oleg.rsoi.dto.statistics.StatisticsResponse;
+import ru.oleg.rsoi.dto.statistics.VisitedMovieEvent;
 import ru.oleg.rsoi.remoteservice.*;
 import ru.oleg.rsoi.service.gateway.Queue;
 import ru.oleg.rsoi.service.gateway.Statistics.Statistics;
@@ -83,7 +86,29 @@ public class GatewayRestController {
     @RequestMapping(value = "/movie/{movieId}", method = RequestMethod.GET)
     public MovieComposite getMovieById(@PathVariable Integer movieId) {
         logger.info("GATEWAY: getting movie " +  movieId);
-        return MovieComposite.from(movieService.findMovie(movieId));
+
+        MovieResponse movie = movieService.findMovie(movieId);
+
+        statQueue.addTask(() -> {
+            VisitedMovieEvent event = new VisitedMovieEvent();
+            event.setMovieId(movieId);
+            event.setTime(System.currentTimeMillis());
+
+            String json;
+            try {
+                json = om.writeValueAsString(event);
+            }
+            catch (JsonProcessingException ex) {
+                logger.error("ERROR IN JSON");
+                return true;
+            }
+
+            statistics.sendMessage(json, "visitedMovie");
+
+            return true;
+        });
+
+        return MovieComposite.from(movie);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -309,6 +334,27 @@ public class GatewayRestController {
         }
 
         return new ResponseEntity<>(tokens, HttpStatus.OK);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/user/isAdmin", method = RequestMethod.GET)
+    public Boolean isAdmin(@RequestParam(name = "token") String token) {
+        return clientService.isAdmin(token);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
+    public void logout(@RequestBody String token) {
+        clientService.logout(token);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/statistics", method = RequestMethod.GET)
+    public StatisticsResponse stats() {
+        RestTemplate rt = new RestTemplate();
+        StatisticsResponse response =
+                rt.getForObject("http://localhost:8094/stat/all", StatisticsResponse.class);
+        return response;
     }
 
 

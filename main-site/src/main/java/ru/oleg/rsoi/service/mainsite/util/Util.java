@@ -10,13 +10,13 @@ import javax.servlet.http.HttpServletResponse;
 
 public class Util {
 
-    private static String getAccessCookie(HttpServletRequest request) {
+    public static String getAccessCookie(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, "RsoiAccess");
         if (cookie == null) return null;
         return cookie.getValue();
     }
 
-    private static String getRefreshCookie(HttpServletRequest request) {
+    public static String getRefreshCookie(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, "RsoiRefresh");
         if (cookie == null) return null;
         return cookie.getValue();
@@ -26,6 +26,12 @@ public class Util {
         String token = getAccessCookie(request);
         if (token == null || token.isEmpty()) return false;
         return service.isAuthenticated(token);
+    }
+
+    static public boolean isAdmin(HttpServletRequest request, RemoteGatewayService service) {
+        String token = getAccessCookie(request);
+        if (token == null || token.isEmpty()) return false;
+        return service.isAdmin(token);
     }
 
     static public void setTokenCookies(String accessToken, String refreshToken, HttpServletResponse servletResponse) {

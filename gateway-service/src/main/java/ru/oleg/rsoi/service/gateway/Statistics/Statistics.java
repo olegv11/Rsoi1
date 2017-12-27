@@ -42,6 +42,7 @@ public class Statistics {
 
     @RabbitListener(queues = "confirmQueue")
     public void receiveConfirm(String in) {
+        logger.debug("RECEIVED CONFIRM WITH MESSAGE " + in);
         Integer id;
         try {
             id = om.readValue(in, Integer.class);
@@ -56,6 +57,7 @@ public class Statistics {
 
     @RabbitListener(queues = "errorQueue")
     public void receiveError(String in) {
+        logger.debug("RECEIVED ERROR WITH MESSAGE " + in);
         Integer id;
         try {
             id = om.readValue(in, Integer.class);
@@ -82,7 +84,6 @@ public class Statistics {
         }
         catch (JsonProcessingException ex) {
             logger.error("Json error");
-            return;
         }
     }
 
@@ -129,7 +130,7 @@ public class Statistics {
                 sendMessage(id, messages.get(id), messageRoute.get(id));
                 itemsToUpdate.add(id);
             } else {
-                RemoveItem(id);
+                RemoveItemLocked(id);
             }
 
         });
@@ -150,11 +151,15 @@ public class Statistics {
             Thread.currentThread().interrupt();
         }
 
+        RemoveItemLocked(id);
+
+        tableSemaphore.release();
+    }
+
+    private void RemoveItemLocked(Integer id) {
         messages.remove(id);
         messageRoute.remove(id);
         expirations.remove(id);
         expirationNumber.remove(id);
-
-        tableSemaphore.release();
     }
 }

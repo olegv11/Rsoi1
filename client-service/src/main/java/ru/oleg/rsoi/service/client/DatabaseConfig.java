@@ -21,7 +21,7 @@ public class DatabaseConfig {
         return DataSourceBuilder.create().build();
     }
 
-    @Bean
+    @Bean(name = "oauthTokenStore")
     public TokenStore tokenStore() {
         return new InMemoryTokenStore();
     }

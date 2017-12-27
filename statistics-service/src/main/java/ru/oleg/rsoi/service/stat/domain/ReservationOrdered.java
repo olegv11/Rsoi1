@@ -11,8 +11,8 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @Accessors(chain = true)
-@Table(name = "loggedinevent")
-public class ReservationOrderedEvent {
+@Table(name = "reservationOrdered")
+public class ReservationOrdered {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

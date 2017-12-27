@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+    <title>Rsoi!</title>
+
+    <!--/*/ <th:block th:include="fragments/headerinc :: head"></th:block> /*/-->
+</head>
+<body>
+<div class="container">
+    <!--/*/ <th:block th:include="fragments/header :: header"></th:block> /*/-->
+    <h2>Statistics</h2>
+
+    <table class="table table-striped">
+        <tr>
+            <th>Average Price per order</th>
+            <th>Average Chairs per order</th>
+            <th>Most watched movie:</th>
+        </tr>
+
+        <tr>
+            <td><span th:text="${averagePrice}">Average Price</span></td>
+            <td><span th:text="${averageChairs}">Average Price</span></td>
+            <td><span th:text="${mostWatchedMovie}">Average Price</span></td>
+        </tr>
+
+    </table>
+</div>
+</body>
+</html>

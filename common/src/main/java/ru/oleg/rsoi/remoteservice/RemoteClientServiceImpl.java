@@ -57,4 +57,31 @@ public class RemoteClientServiceImpl implements RemoteClientService {
         result.setRefreshToken((String)response.getBody().get("refresh_token"));
         return result;
     }
+
+    @Override
+    public boolean isAdmin(String token) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://localhost:8093/client/isAdmin")
+                .queryParam("token", token);
+
+        ResponseEntity<Boolean> response;
+        try {
+            RestTemplate rt = new RestTemplate();
+            response = rt.getForEntity(builder.build().encode().toUri(), Boolean.class);
+        } catch (RestClientException e) {
+            return false;
+        }
+
+        return response.getBody();
+    }
+
+    @Override
+    public void logout(String token) {
+
+        ResponseEntity<Void> response;
+        try {
+            RestTemplate rt = new RestTemplate();
+            response = rt.postForEntity("http://localhost:8093/client/logout", token, Void.class);
+        } catch (RestClientException e) {
+        }
+    }
 }

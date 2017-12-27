@@ -13,8 +13,8 @@ public class RabbitConfig {
     }
 
     @Bean
-    Queue userLoggedInQueue() {
-        return new Queue("userLoggedInQueue");
+    Queue visitedMovieQueue() {
+        return new Queue("visitedMovieQueue");
     }
 
     @Bean
@@ -31,9 +31,9 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Binding userLoggedInBinding(DirectExchange exchange, Queue userLoggedInQueue) {
-        return BindingBuilder.bind(userLoggedInQueue)
+    public Binding visitedMovieBinding(DirectExchange exchange, Queue visitedMovieQueue) {
+        return BindingBuilder.bind(visitedMovieQueue)
                 .to(exchange)
-                .with("userLoggedIn");
+                .with("visitedMovie");
     }
 }

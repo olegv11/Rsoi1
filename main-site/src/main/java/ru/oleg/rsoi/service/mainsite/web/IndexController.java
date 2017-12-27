@@ -63,6 +63,7 @@ public class IndexController {
 
     @RequestMapping(value = "/logout")
     public String logout(HttpServletRequest request, HttpServletResponse response) {
+        gatewayService.logout(Util.getRefreshCookie(request));
         Util.clearTokenCookies(response);
         return "redirect:/";
     }

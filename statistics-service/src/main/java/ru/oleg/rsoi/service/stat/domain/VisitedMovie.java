@@ -11,11 +11,14 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @Accessors(chain = true)
-@Table(name = "loggedinevent")
-public class LoggedInEvent {
+@Table(name = "visitedMovie")
+public class VisitedMovie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column
+    private Integer movieId;
 
     @Column
     @Temporal(TemporalType.TIMESTAMP)
